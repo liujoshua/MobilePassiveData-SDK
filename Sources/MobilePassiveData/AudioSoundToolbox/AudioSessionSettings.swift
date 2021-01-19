@@ -70,21 +70,20 @@ public struct AudioSessionSettings : Codable, Hashable {
     /// collected without it.
     public static let `default` = AudioSessionSettings()
     
-    /// Used for cases where the voice prompts run while this audio session is active should duck
-    /// other audio. This will speak the voice prompts played by the action *even if* the
-    /// participant has their silencer on.
+    /// The activity includes voice prompts that should duck other audio, but where playback is
+    /// intermittent- in other words, there isn't a continuous sound file being played. This will
+    /// speak the voice prompts played by the action *even if* the participant has their silencer
+    /// on.
     ///
     /// - note: If an app requires background audio, the app developer needs to add this capability.
     public static let voicePrompt = AudioSessionSettings(category: .intermittentPlayback,
                                                          mode: .voicePrompt,
                                                          mixingOptions: .duckOthers)
     
-    /// Used for cases where the voice prompts run while this audio session is active, music playing
-    /// should be mixed (quieter while speaking) and voice audio should be interupted. This is
-    /// used by an activity where you want the participant's music to play while the activity is
-    /// running but also allow voice prompts to be played even if the app is in the background.
-    /// This will speak the voice prompts played by the action *even if* the participant has their
-    /// silencer on.
+    /// The activity includes voice prompts that may be voiced even if the app is in the background.
+    /// The user may be playing music of their own choosing that should be mixed with the voice
+    /// prompts, *but* spoken audio (such as an audio book) should be interrupted.  This will speak
+    /// the voice prompts played by the action *even if* the participant has their silencer on.
     ///
     /// - note: The app developer needs to add the background audio capability.
     public static let backgroundVoicePrompt = AudioSessionSettings(category: .continuousPlayback,
@@ -166,7 +165,7 @@ public struct AudioSessionSettings : Codable, Hashable {
         /// An option that determines whether to pause spoken audio content from other sessions
         /// when your app plays its audio.
         case interruptSpokenAudioAndMixWithOthers
-        /// An option that reduces the volume of other audio session while audio from this session
+        /// An option that reduces the volume of other audio sessions while audio from this session
         /// plays.
         case duckOthers
         

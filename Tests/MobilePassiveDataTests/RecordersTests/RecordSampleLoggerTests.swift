@@ -1,6 +1,5 @@
 //
 //  RecordSampleLoggerTests.swift
-//  Research
 //
 //  Copyright © 2018-2021 Sage Bionetworks. All rights reserved.
 //

@@ -1,6 +1,5 @@
 //
 //  AudioRecorder.swift
-//  ResearchAudioRecorder
 //
 //  Copyright © 2020-2021 Sage Bionetworks. All rights reserved.
 //

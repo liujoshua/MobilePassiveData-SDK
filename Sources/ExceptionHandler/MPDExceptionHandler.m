@@ -1,6 +1,5 @@
 //
 //  MPDExceptionHandler.m
-//  Research
 //
 //  Copyright © 2017-2021 Sage Bionetworks. All rights reserved.
 //

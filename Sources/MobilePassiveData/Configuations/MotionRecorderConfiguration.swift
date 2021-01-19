@@ -34,8 +34,8 @@
 import Foundation
 import JsonModel
 
-/// Additional configuration parameters required by the `MotionRecord` defined in the `MotionSensor`
-/// library.
+/// Additional configuration parameters required by the `MotionRecorder` defined in the
+/// `MotionSensor` library.
 public protocol MotionRecorderConfiguration : RestartableRecorderConfiguration {
     
     /// The `CoreMotion` device sensor types to include with this configuration. If `nil` then the
