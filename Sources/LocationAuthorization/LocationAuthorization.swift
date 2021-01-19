@@ -122,13 +122,18 @@ public final class LocationAuthorization : PermissionAuthorizationAdaptor {
             completion(.denied, error)
             return
         }
-        
+        #if os(macOS)
+        locationManager.requestAlwaysAuthorization()
+        #elseif os(tvOS)
+        locationManager.requestWhenInUseAuthorization()
+        #else
         switch permissionType {
         case StandardPermissionType.location:
             locationManager.requestAlwaysAuthorization()
         default:
             locationManager.requestWhenInUseAuthorization()
         }
+        #endif
         
         completion(self.authorizationStatus(for: permissionType), nil)
     }

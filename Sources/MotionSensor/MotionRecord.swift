@@ -34,7 +34,6 @@
 import Foundation
 import MobilePassiveData
 import JsonModel
-import CoreMotion
 
 /// A `MotionRecord` is a `Codable` implementation of `SampleRecord` that can be used
 /// to record a sample from one of the core motion sensors or calculated vectors of the
@@ -144,6 +143,8 @@ public struct MotionRecord : SampleRecord, DelimiterSeparatedEncodable {
         self.y = data.vector.y
         self.z = data.vector.z
     }
+    
+    #if os(iOS)
 
     /// Initialize from a `CMDeviceMotion` for a given sensor type or calculated vector.
     /// - parameters:
@@ -203,6 +204,7 @@ public struct MotionRecord : SampleRecord, DelimiterSeparatedEncodable {
         self.w = w
         self.heading = heading
     }
+    #endif
 }
 
 /// A string-value representation for the attitude reference frame.
@@ -218,6 +220,8 @@ public enum AttitudeReferenceFrame : String, Codable, CaseIterable, Documentable
     /// - note: Using this reference frame may require user interaction to calibrate the magnetometer.
     case xMagneticNorthZVertical = "North-West-Up"
 
+    #if os(iOS)
+    
     init(frame : CMAttitudeReferenceFrame) {
         switch frame {
         case .xMagneticNorthZVertical:
@@ -226,6 +230,8 @@ public enum AttitudeReferenceFrame : String, Codable, CaseIterable, Documentable
             self = .xArbitraryZVertical
         }
     }
+    
+    #endif
     
     public static func allValues() -> [String] {
         AttitudeReferenceFrame.allCases.map { $0.rawValue }
@@ -240,18 +246,6 @@ public protocol MotionVector {
     var z: Double { get }
 }
 
-extension CMAcceleration : MotionVector {
-}
-
-extension CMRotationRate : MotionVector {
-}
-
-extension CMQuaternion : MotionVector {
-}
-
-extension CMMagneticField : MotionVector {
-}
-
 // `MotionVector` is a convenience protocol for converting various CoreMotion sensor
 /// data to a common schema.
 public protocol MotionVectorData {
@@ -264,6 +258,22 @@ public protocol MotionVectorData {
 
     /// The raw motion sensor type.
     var sensorType: MotionRecorderType { get }
+}
+
+#if canImport(CoreMotion)
+
+import CoreMotion
+
+extension CMAcceleration : MotionVector {
+}
+
+extension CMRotationRate : MotionVector {
+}
+
+extension CMQuaternion : MotionVector {
+}
+
+extension CMMagneticField : MotionVector {
 }
 
 extension CMAccelerometerData : MotionVectorData {
@@ -305,6 +315,7 @@ extension CMMagnetometerData : MotionVectorData {
     }
 }
 
+#endif
 
 // Documentation and Tests
 

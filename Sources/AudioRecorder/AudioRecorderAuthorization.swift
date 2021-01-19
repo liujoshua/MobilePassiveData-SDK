@@ -31,8 +31,11 @@
 //
 
 import Foundation
-import AVFoundation
 import MobilePassiveData
+
+#if canImport(AVFoundation)
+import AVFoundation
+#endif
 
 fileprivate let _userDefaultsKey = "rsd_AudioRecorderStatus"
 
@@ -58,6 +61,7 @@ public final class AudioRecorderAuthorization : PermissionAuthorizationAdaptor {
     }
     
     static public func authorizationStatus() -> PermissionAuthorizationStatus {
+        #if os(iOS)
         let status = AVAudioSession.sharedInstance().recordPermission
         switch status {
         case .denied:
@@ -67,6 +71,9 @@ public final class AudioRecorderAuthorization : PermissionAuthorizationAdaptor {
         default:
             return .notDetermined
         }
+        #else
+        return .authorized
+        #endif
     }
     
     /// Requests permission to record.
@@ -80,6 +87,7 @@ public final class AudioRecorderAuthorization : PermissionAuthorizationAdaptor {
 
     /// Request authorization to record.
     static public func requestAuthorization(_ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
+        #if os(iOS)
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             if granted {
                 completion(.authorized, nil)
@@ -87,5 +95,8 @@ public final class AudioRecorderAuthorization : PermissionAuthorizationAdaptor {
                 completion(.denied, nil)
             }
         }
+        #else
+        completion(.authorized, nil)
+        #endif
     }
 }

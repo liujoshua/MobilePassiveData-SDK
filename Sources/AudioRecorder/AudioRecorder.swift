@@ -30,9 +30,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#if !os(tvOS)
+
 import Foundation
-import AVFoundation
 import MobilePassiveData
+
+#if canImport(AVFoundation)
+import AVFoundation
+#endif
 
 
 /// `AudioRecorder` is a subclass of `RSDSampleRecorder` that implements recording audio.
@@ -245,6 +250,8 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessi
     
     func setupInterruptionObserver() {
         
+        #if canImport(AVFoundation) && !os(macOS)
+        
         // If the task should cancel if interrupted by a phone call, then set up a listener.
         _audioInterruptObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: OperationQueue.main, using: { [weak self] (notification) in
             guard let rawValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -258,6 +265,8 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessi
             // (not currently implemented), just stop the recorder. syoung 05/21/2019
             self?.didFail(with: RecorderError.interrupted)
         })
+        
+        #endif
     }
     
     func stopInterruptionObserver() {
@@ -286,3 +295,4 @@ class AudioFileHandle : LogFileHandle {
 }
 
 
+#endif

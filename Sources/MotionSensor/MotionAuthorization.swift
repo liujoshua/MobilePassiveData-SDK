@@ -30,6 +30,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#if os(iOS)
+
 import UIKit
 import Foundation
 import CoreMotion
@@ -134,3 +136,5 @@ public final class MotionAuthorization : PermissionAuthorizationAdaptor {
         UserDefaults.standard.set(authorized, forKey: _userDefaultsKey)
     }
 }
+
+#endif

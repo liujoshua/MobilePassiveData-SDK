@@ -80,7 +80,11 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
         if status == .notDetermined {
             self.status = .requestingPermission
             self._permissionCompletion = completion
+            #if os(macOS)
+            self.locationManager!.requestAlwaysAuthorization()
+            #else
             self.locationManager!.requestWhenInUseAuthorization()
+            #endif
         }
         else {
             self.status = .permissionGranted
@@ -97,8 +101,10 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
         // setup the location manager when asking for permissions
         let manager = CLLocationManager()
         manager.delegate = self
+        #if os(iOS)
         manager.allowsBackgroundLocationUpdates = false
         manager.pausesLocationUpdatesAutomatically = false
+        #endif
         self.locationManager = manager
     }
     
@@ -123,8 +129,12 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     private func _requestLocation(_ completion: AsyncActionCompletionHandler?) {
         guard self.status < .running else { return }
         let status = CLLocationManager.authorizationStatus()
-        guard status == .authorizedAlways || status == .authorizedWhenInUse
-        else {
+        #if os(macOS)
+        let granted = status == .authorizedAlways
+        #else
+        let granted = status == .authorizedAlways || status == .authorizedWhenInUse
+        #endif
+        guard granted else {
             _serviceFailed(status: .denied)
             DispatchQueue.main.async {
                 completion?(self, nil, self.error)

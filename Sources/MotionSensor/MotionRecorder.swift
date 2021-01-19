@@ -30,6 +30,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
     
+#if os(iOS)
+
 import UIKit
 import CoreMotion
 import MobilePassiveData
@@ -334,3 +336,4 @@ public class MotionRecorder : SampleRecorder, AudioSessionActivity {
     }
 }
 
+#endif

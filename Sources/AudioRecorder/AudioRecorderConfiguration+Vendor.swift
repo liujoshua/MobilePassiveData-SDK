@@ -31,6 +31,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#if !os(tvOS)
+
 import Foundation
 import MobilePassiveData
 import AsyncActionSerialization
@@ -45,3 +47,5 @@ extension AudioRecorderConfigurationObject : AsyncActionVendor {
 }
 
 // TODO: syoung 01/14/2021 Create a Kotlin/Native model object and implement extensions.
+
+#endif
