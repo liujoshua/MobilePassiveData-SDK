@@ -41,7 +41,7 @@ extension SerializableResultType {
 
 /// A `WeatherResult` includes results for both weather and air quality in a consolidated result.
 /// Because this result must be mutable, it is defined as a class.
-public class WeatherResult : SerializableResultData {
+public final class WeatherResult : SerializableResultData {
     private enum CodingKeys : String, CodingKey, CaseIterable {
         case identifier, serializableResultType = "type", startDate, endDate, weather, airQuality
     }
@@ -58,9 +58,51 @@ public class WeatherResult : SerializableResultData {
     }
 }
 
+extension WeatherResult : DocumentableStruct {
+
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        guard let key = codingKey as? CodingKeys else { return false }
+        switch key {
+        case .identifier, .serializableResultType, .startDate:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .serializableResultType:
+            return .init(constValue: SerializableResultType.weather)
+        case .identifier:
+            return .init(propertyType: .primitive(.string))
+        case .startDate, .endDate:
+            return .init(propertyType: .format(.dateTime))
+        case .airQuality:
+            return .init(propertyType: .reference(AirQualityServiceResult.documentableType()))
+        case .weather:
+            return .init(propertyType: .reference(WeatherServiceResult.documentableType()))
+        }
+    }
+    
+    public static func examples() -> [WeatherResult] {
+        let example = WeatherResult(identifier: "weather")
+        example.airQuality = AirQualityServiceResult.examples().first
+        example.weather = WeatherServiceResult.examples().first
+        return [example]
+    }
+}
+
 public struct WeatherServiceResult : Codable, Equatable {
     private enum CodingKeys : String, CodingKey, CaseIterable {
-        case serviceType = "type", identifier, providerName, startDate,
+        case serviceType = "type", identifier, providerName = "provider", startDate,
              temperature, seaLevelPressure, groundLevelPressure, humidity, clouds, rain, snow, wind
     }
     public private(set) var serviceType: WeatherServiceType = .weather
@@ -94,6 +136,9 @@ public struct WeatherServiceResult : Codable, Equatable {
     public let wind: Wind?
     
     public struct Precipitation: Codable, Equatable {
+        private enum CodingKeys : String, CodingKey, CaseIterable {
+            case pastHour, pastThreeHours
+        }
         /// Amount of precipitation in the past hour.
         public let pastHour: Double?
         /// Amount of precipitation in the past three hours.
@@ -101,6 +146,9 @@ public struct WeatherServiceResult : Codable, Equatable {
     }
 
     public struct Wind : Codable, Equatable {
+        private enum CodingKeys : String, CodingKey, CaseIterable {
+            case speed, degrees, gust
+        }
         /// Wind speed. Unit: meter/sec
         public let speed: Double
         /// Wind direction, degrees (meteorological)
@@ -121,9 +169,102 @@ extension WeatherServiceResult : SerializableResultData {
     }
 }
 
+extension WeatherServiceResult : DocumentableStruct {
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        guard let key = codingKey as? CodingKeys else { return false }
+        switch key {
+        case .identifier,.serviceType,.providerName,.startDate:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .identifier:
+            return .init(propertyType: .primitive(.string), propertyDescription: "Result identifier")
+        case .serviceType:
+            return .init(constValue: WeatherServiceType.weather)
+        case .providerName:
+            return .init(propertyType: .reference(WeatherServiceProviderName.documentableType()))
+        case .startDate:
+            return .init(propertyType: .format(.dateTime))
+        case .clouds, .temperature, .groundLevelPressure, .seaLevelPressure, .humidity:
+            return .init(propertyType: .primitive(.number))
+        case .rain, .snow:
+            return .init(propertyType: .reference(Precipitation.documentableType()))
+        case .wind:
+            return .init(propertyType: .reference(Wind.documentableType()))
+        }
+    }
+    
+    public static func examples() -> [WeatherServiceResult] {
+        [WeatherServiceResult(identifier: "weather", providerName: .openWeather, startDate: Date(), temperature: 20, seaLevelPressure: nil, groundLevelPressure: nil, humidity: 0.9, clouds: 0.4, rain: nil, snow: nil, wind: nil)]
+    }
+}
+
+extension WeatherServiceResult.Precipitation : DocumentableStruct {
+
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        false
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .pastHour:
+            return .init(propertyType: .primitive(.number), propertyDescription: "Precipitation in the past hour.")
+        case .pastThreeHours:
+            return .init(propertyType: .primitive(.number), propertyDescription: "Precipitation in the past 3 hours.")
+        }
+    }
+    
+    public static func examples() -> [WeatherServiceResult.Precipitation] {
+        [.init(pastHour: 5.0, pastThreeHours: 12.0)]
+    }
+}
+
+extension WeatherServiceResult.Wind : DocumentableStruct {
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        (codingKey as? CodingKeys) == .speed
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .speed, .degrees, .gust:
+            return .init(propertyType: .primitive(.number))
+        }
+    }
+    
+    public static func examples() -> [WeatherServiceResult.Wind] {
+        [.init(speed: 5, degrees: 20, gust: 1)]
+    }
+}
+
 public struct AirQualityServiceResult : Codable, Equatable {
     private enum CodingKeys : String, CodingKey, CaseIterable {
-        case serviceType = "type", identifier, providerName, startDate, aqi, category
+        case serviceType = "type", identifier, providerName = "provider", startDate, aqi, category
     }
     public private(set) var serviceType: WeatherServiceType = .airQuality
     
@@ -134,6 +275,9 @@ public struct AirQualityServiceResult : Codable, Equatable {
     public let category: Category?
 
     public struct Category : Codable, Equatable {
+        private enum CodingKeys : String, CodingKey, CaseIterable {
+            case number, name
+        }
         public let number: Int
         public let name: String
     }
@@ -147,5 +291,67 @@ extension AirQualityServiceResult : SerializableResultData {
     public var endDate: Date {
         get { startDate }
         set {} // ignored
+    }
+}
+
+extension AirQualityServiceResult.Category : DocumentableStruct {
+
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        true
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .name:
+            return .init(propertyType: .primitive(.string))
+        case .number:
+            return .init(propertyType: .primitive(.number))
+        }
+    }
+    
+    public static func examples() -> [AirQualityServiceResult.Category] {
+        [AirQualityServiceResult.Category(number: 1, name: "Good")]
+    }
+}
+
+extension AirQualityServiceResult : DocumentableStruct {
+
+    public static func codingKeys() -> [CodingKey] {
+        CodingKeys.allCases
+    }
+    
+    public static func isRequired(_ codingKey: CodingKey) -> Bool {
+        true
+    }
+    
+    public static func documentProperty(for codingKey: CodingKey) throws -> DocumentProperty {
+        guard let key = codingKey as? CodingKeys else {
+            throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
+        }
+        switch key {
+        case .identifier:
+            return .init(propertyType: .primitive(.string))
+        case .startDate:
+            return .init(propertyType: .format(.dateTime))
+        case .serviceType:
+            return .init(constValue: WeatherServiceType.airQuality)
+        case .providerName:
+            return .init(propertyType: .reference(WeatherServiceProviderName.documentableType()))
+        case .aqi:
+            return .init(propertyType: .primitive(.number), propertyDescription: "Air Quality Index")
+        case .category:
+            return .init(propertyType: .reference(Category.documentableType()))
+        }
+    }
+    
+    public static func examples() -> [AirQualityServiceResult] {
+        [AirQualityServiceResult(identifier: "airQuality", providerName: "airNow", aqi: 2, category: .init(number: 2, name: "Moderate"))]
     }
 }
