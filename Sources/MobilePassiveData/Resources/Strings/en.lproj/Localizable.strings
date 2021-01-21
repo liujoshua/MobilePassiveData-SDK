@@ -1,0 +1,43 @@
+/* 
+
+    Copyright © 2017-2021 Sage Bionetworks. All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without modification,
+    are permitted provided that the following conditions are met:
+
+    1.  Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+    2.  Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
+
+    3.  Neither the name of the copyright holder(s) nor the names of any contributors
+    may be used to endorse or promote products derived from this software without
+    specific prior written permission. No license is granted to the trademarks of
+    the copyright holders even if such marks are included in this software.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+"PHOTO_LIBRARY_PERMISSION_DENIED" = "You have not given this app permission to use the photo library. You can enable access in the Privacy Settings.";
+"PHOTO_LIBRARY_PERMISSION_RESTRICTED" = "Access to the photo library is restricted. You must allow permission within 'Settings -> General -> Restrictions'";
+"CAMERA_PERMISSION_DENIED" = "You have not given this app permission to use the camera. You can enable access in the Privacy Settings.";
+"CAMERA_PERMISSION_RESTRICTED" = "Access to the camera is restricted. You must allow permission within 'Settings -> General -> Restrictions'";
+"MICROPHONE_PERMISSION_DENIED" = "You have not given this app permission to use the microphone. You can enable access in the Privacy Settings.";
+"MICROPHONE_PERMISSION_RESTRICTED" = "Access to the microphone is restricted. You must allow permission within 'Settings -> General -> Restrictions'";
+"LOCATION_IN_USE_PERMISSION_DENIED" = "You have not given this app permission to use location services (GPS). You can enable access in the Privacy Settings.";
+"LOCATION_BACKGROUND_PERMISSION_DENIED" = "You have not given this app permission to use location services (GPS) in the background. You can enable access in the Privacy Settings.";
+"LOCATION_PERMISSION_RESTRICTED" = "Access to the location services (GPS) is restricted. You must allow permission within 'Settings -> General -> Restrictions'";
+"MOTION_PERMISSION_DENIED" = "You have not given this app permission to use the motion and fitness sensors. You can enable access by turning on 'Motion & Fitness' in the Privacy Settings.";
+"GENERAL_PERMISSION_RESTRICTED" = "This activity requires access to permissions or settings that are restricted on this device.";
