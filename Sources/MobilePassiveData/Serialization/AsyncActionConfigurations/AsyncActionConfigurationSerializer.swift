@@ -33,7 +33,6 @@
 
 import Foundation
 import JsonModel
-import MobilePassiveData
 
 
 /// `AsyncActionType` is an extendable string enum used by the `SerializationFactory` to

@@ -33,7 +33,6 @@
 
 import Foundation
 import JsonModel
-import MobilePassiveData
 
 public struct WeatherConfigurationObject : WeatherConfiguration {
     private enum CodingKeys: String, CodingKey, CaseIterable {

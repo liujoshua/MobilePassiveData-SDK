@@ -33,7 +33,6 @@
 
 import Foundation
 import JsonModel
-import MobilePassiveData
 
 extension SerializableResultType {
     public static let weather: SerializableResultType = "weather"
@@ -53,7 +52,7 @@ public final class WeatherResult : SerializableResultData {
     public var weather: WeatherServiceResult?
     public var airQuality: AirQualityServiceResult?
     
-    init(identifier: String) {
+    public init(identifier: String) {
         self.identifier = identifier
     }
 }
@@ -135,6 +134,30 @@ public struct WeatherServiceResult : Codable, Equatable {
     /// Current wind conditions.
     public let wind: Wind?
     
+    public init(identifier: String,
+                providerName: WeatherServiceProviderName,
+                startDate: Date,
+                temperature: Double?,
+                seaLevelPressure: Double?,
+                groundLevelPressure: Double?,
+                humidity: Double?,
+                clouds: Double?,
+                rain: Precipitation?,
+                snow: Precipitation?,
+                wind: Wind?) {
+        self.identifier = identifier
+        self.providerName = providerName
+        self.startDate = startDate
+        self.temperature = temperature
+        self.seaLevelPressure = seaLevelPressure
+        self.groundLevelPressure = groundLevelPressure
+        self.humidity = humidity
+        self.clouds = clouds
+        self.rain = rain
+        self.snow = snow
+        self.wind = wind
+    }
+    
     public struct Precipitation: Codable, Equatable {
         private enum CodingKeys : String, CodingKey, CaseIterable {
             case pastHour, pastThreeHours
@@ -143,6 +166,11 @@ public struct WeatherServiceResult : Codable, Equatable {
         public let pastHour: Double?
         /// Amount of precipitation in the past three hours.
         public let pastThreeHours: Double?
+        
+        public init(pastHour: Double?, pastThreeHours: Double?) {
+            self.pastHour = pastHour
+            self.pastThreeHours = pastThreeHours
+        }
     }
 
     public struct Wind : Codable, Equatable {
@@ -155,6 +183,12 @@ public struct WeatherServiceResult : Codable, Equatable {
         public let degrees: Double?
         /// Wind gust. Unit: meter/sec
         public let gust: Double?
+        
+        public init(speed: Double, degrees: Double?, gust: Double?) {
+            self.speed = speed
+            self.degrees = degrees
+            self.gust = gust
+        }
     }
 }
 
@@ -270,9 +304,21 @@ public struct AirQualityServiceResult : Codable, Equatable {
     
     public let identifier: String
     public let providerName: WeatherServiceProviderName
-    public var startDate: Date = Date()
+    public var startDate: Date
     public let aqi: Int?
     public let category: Category?
+    
+    public init(identifier: String,
+                providerName: WeatherServiceProviderName,
+                startDate: Date,
+                aqi: Int?,
+                category: Category?) {
+        self.identifier = identifier
+        self.providerName = providerName
+        self.startDate = startDate
+        self.aqi = aqi
+        self.category = category
+    }
 
     public struct Category : Codable, Equatable {
         private enum CodingKeys : String, CodingKey, CaseIterable {
@@ -280,6 +326,10 @@ public struct AirQualityServiceResult : Codable, Equatable {
         }
         public let number: Int
         public let name: String
+        public init(number: Int, name: String) {
+            self.number = number
+            self.name = name
+        }
     }
 }
 
@@ -352,6 +402,6 @@ extension AirQualityServiceResult : DocumentableStruct {
     }
     
     public static func examples() -> [AirQualityServiceResult] {
-        [AirQualityServiceResult(identifier: "airQuality", providerName: "airNow", aqi: 2, category: .init(number: 2, name: "Moderate"))]
+        [AirQualityServiceResult(identifier: "airQuality", providerName: "airNow", startDate: Date(), aqi: 2, category: .init(number: 2, name: "Moderate"))]
     }
 }

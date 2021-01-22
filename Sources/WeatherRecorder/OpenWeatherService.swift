@@ -52,13 +52,14 @@ public class OpenWeatherService : WeatherService {
         task.resume()
     }
     
-    private func processResponse(_ url: URL, _ data: Data?, _ error: Error?, _ completion: @escaping WeatherServiceCompletionHandler) {
+    func processResponse(_ url: URL, _ data: Data?, _ error: Error?, _ completion: @escaping WeatherServiceCompletionHandler) {
         guard error == nil, let json = data else {
             completion(self, nil, error)
             return
         }
         do {
             let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .secondsSince1970
             let responseObject = try decoder.decode(ResponseObject.self, from: json)
             let result = responseObject.copyTo(with: configuration.identifier)
             completion(self, [result], nil)

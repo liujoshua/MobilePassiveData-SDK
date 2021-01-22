@@ -31,7 +31,6 @@
 //
 
 import Foundation
-import AsyncActionSerialization
 import MobilePassiveData
 
 extension WeatherConfigurationObject : AsyncActionVendor {
