@@ -1,5 +1,5 @@
 //
-//  AsyncActionFactory.swift
+//  MobilePassiveDataFactory.swift
 //  
 //  Copyright © 2021 Sage Bionetworks. All rights reserved.
 //
@@ -32,16 +32,20 @@
 
 import Foundation
 import JsonModel
-import MobilePassiveData
 
-/// `AsyncActionFactory` is a subclass of the `ResultDataFactory` that registers a serializer
+/// `MobilePassiveDataFactory` is a subclass of the `ResultDataFactory` that registers a serializer
 /// for `AsyncActionConfiguration` objects that can be used to deserialize the results.
-open class AsyncActionFactory : ResultDataFactory {
+open class MobilePassiveDataFactory : ResultDataFactory {
 
     public let asyncActionSerializer = AsyncActionConfigurationSerializer()
 
     public required init() {
         super.init()
         self.registerSerializer(asyncActionSerializer)
+        
+        // Add weather results
+        self.resultSerializer.add(WeatherResult(identifier: "weather"))
+        self.resultSerializer.add(AirQualityServiceResult.examples().first!)
+        self.resultSerializer.add(WeatherServiceResult.examples().first!)
     }
 }

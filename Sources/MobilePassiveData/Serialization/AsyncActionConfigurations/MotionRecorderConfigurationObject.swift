@@ -32,7 +32,6 @@
 
 import Foundation
 import JsonModel
-import MobilePassiveData
 
 /// The default configuration to use for a `MotionSensor.MotionRecorder`.
 ///

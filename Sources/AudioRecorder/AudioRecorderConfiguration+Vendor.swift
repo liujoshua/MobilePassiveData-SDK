@@ -35,7 +35,6 @@
 
 import Foundation
 import MobilePassiveData
-import AsyncActionSerialization
 
 extension AudioRecorderConfigurationObject : AsyncActionVendor {
     public func instantiateController(outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) -> AsyncActionController? {

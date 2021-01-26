@@ -44,15 +44,16 @@ public class AirNowService : WeatherService {
     }
         
     public func fetchResult(for coordinates: CLLocation, _ completion: @escaping WeatherServiceCompletionHandler) {
-        let dateString = ISO8601DateOnlyFormatter.string(from: Date())
+        let date = Date()
+        let dateString = ISO8601DateOnlyFormatter.string(from: date)
         let url = URL(string: "https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=\(coordinates.coordinate.latitude)&longitude=\(coordinates.coordinate.longitude)&date=\(dateString)&distance=25&API_KEY=\(configuration.apiKey)")!
         let task = URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
-            self?.processResponse(url, dateString, data, error, completion)
+            self?.processResponse(url, dateString, date, data, error, completion)
         }
         task.resume()
     }
     
-    private func processResponse(_ url: URL, _ dateString: String, _ data: Data?, _ error: Error?, _ completion: @escaping WeatherServiceCompletionHandler) {
+    func processResponse(_ url: URL, _ dateString: String, _ date: Date, _ data: Data?, _ error: Error?, _ completion: @escaping WeatherServiceCompletionHandler) {
         guard error == nil, let json = data else {
             completion(self, nil, error)
             return
@@ -68,6 +69,7 @@ public class AirNowService : WeatherService {
             }
             let result = AirQualityServiceResult(identifier: configuration.identifier,
                                                  providerName: .airNow,
+                                                 startDate: date,
                                                  aqi: responseObject.aqi,
                                                  category: responseObject.category?.copyTo())
             completion(self, [result], nil)

@@ -14,13 +14,27 @@ let package = Package(
         .tvOS(.v12)
     ],
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
+        // MARK: Main Library
         .library(
             name: "MobilePassiveData",
             targets: ["MobilePassiveData",
-                      "AsyncActionSerialization",
                       "ExceptionHandler",
             ]),
+        
+        // MARK: Additional Libraries
+        //
+        // "Starting Spring 2019, all apps submitted to the App Store that access user data will
+        //  be required to include a purpose string. If you're using external libraries or SDKs,
+        //  they may reference APIs that require a purpose string. While your app might not use
+        //  these APIs, a purpose string is still required. You can contact the developer of the
+        //  library or SDK and request they release a version of their code that doesn't contain
+        //  the APIs." - syoung 05/15/2019 Message from Apple's App Store Connect.
+        //
+        // As a consequence of this, any framework that relies upon motion sensors, GPS,
+        // microphone, or camera must be embedded separately from the shared code that supports
+        // using these sensors. Therefore, the `MobilePassiveData` target is included separately
+        // from the libraries in this repo that rely upon these sensors.
+        
         .library(
             name: "MotionSensor",
             targets: ["MotionSensor"]),
@@ -68,29 +82,6 @@ let package = Package(
         .target(name: "ExceptionHandler",
                 dependencies: []),
         
-        // "Starting Spring 2019, all apps submitted to the App Store that access user data will
-        //  be required to include a purpose string. If you're using external libraries or SDKs,
-        //  they may reference APIs that require a purpose string. While your app might not use
-        //  these APIs, a purpose string is still required. You can contact the developer of the
-        //  library or SDK and request they release a version of their code that doesn't contain
-        //  the APIs." - syoung 05/15/2019 Message from Apple's App Store Connect.
-        //
-        // As a consequence of this, any framework that relies upon motion sensors, GPS,
-        // microphone, or camera must be embedded separately from the shared code that supports
-        // using these sensors. Therefore, the `MobilePassiveData` target is included separately
-        // from the libraries in this repo that rely upon these sensors.
-        //
-        // That said, the *serialization* of these configurations where the serialization is done
-        // using Swift requires setting up a polymorphic serializer that knows about *all* the
-        // supported configurations. The simpliest way to ensure that the correct default
-        // configuration is used is to use subclassing and a "catalog". `AsyncActionSerialization`
-        // is that catalog.
-        .target(name: "AsyncActionSerialization",
-                dependencies: [
-                    "JsonModel",
-                    "MobilePassiveData",
-                ]),
-        
         // Supports recording audio using the microphone with a standardized permission and
         // recording structure. This library implements the recorder associated with the
         // `AudioRecorderConfiguration` defined in the base library for this package.
@@ -101,7 +92,6 @@ let package = Package(
                 dependencies: [
                     "JsonModel",
                     "MobilePassiveData",
-                    "AsyncActionSerialization",
                 ]),
         
         // Supports the use of `CoreMotion` with a standardized permission and recording structure.
@@ -114,7 +104,6 @@ let package = Package(
                 dependencies: [
                     "JsonModel",
                     "MobilePassiveData",
-                    "AsyncActionSerialization",
                 ]),
         .testTarget(
             name: "MotionSensorTests",
@@ -126,7 +115,6 @@ let package = Package(
         // up UI for requesting permissions prior to using them in background recorders.
         .target(name: "LocationAuthorization",
                 dependencies: [
-                    "JsonModel",
                     "MobilePassiveData",
                 ]),
         
@@ -136,8 +124,13 @@ let package = Package(
                 dependencies: [
                     "JsonModel",
                     "MobilePassiveData",
-                    "AsyncActionSerialization",
                 ]),
+        .testTarget(
+            name: "WeatherRecorderTests",
+            dependencies: [
+                "WeatherRecorder",
+                "SharedResourcesTests",
+            ]),
         
         // Unit test utilities.
         .target(name: "NSLocaleSwizzle",

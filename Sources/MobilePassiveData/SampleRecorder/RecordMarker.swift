@@ -52,18 +52,13 @@ public struct RecordMarker : SampleRecord {
     ///        }
     ///     ```
     private enum CodingKeys : String, CodingKey, CaseIterable {
-        case uptime, stepPath, _timestampDate="timestampDate", _timestamp="timestamp"
+        case uptime, stepPath, timestampDate, timestamp
     }
     
     public let uptime: TimeInterval
-    
     public let stepPath: String
-    
-    public var timestampDate: Date? { _timestampDate }
-    private var _timestampDate: Date
-    
-    public var timestamp: TimeInterval? { _timestamp }
-    private var _timestamp: TimeInterval
+    public let timestampDate: Date?
+    public let timestamp: TimeInterval?
     
     /// Default initializer.
     /// - parameters:
@@ -73,9 +68,9 @@ public struct RecordMarker : SampleRecord {
     ///     - timestamp: Relative time to when the recorder was started.
     public init(uptime: TimeInterval, timestamp: TimeInterval, date: Date, stepPath: String) {
         self.uptime = uptime
-        self._timestamp = timestamp
+        self.timestamp = timestamp
         self.stepPath = stepPath
-        self._timestampDate = date
+        self.timestampDate = date
     }
 }
 
@@ -97,13 +92,13 @@ extension RecordMarker : DocumentableStruct {
             throw ValidationError.invalidType("\(codingKey) is not of type \(CodingKeys.self)")
         }
         switch key {
-        case ._timestamp:
+        case .timestamp:
             return .init(propertyType: .primitive(.number),
                          propertyDescription: "Duration (in seconds) from when the recording was started.")
         case .uptime:
             return .init(propertyType: .primitive(.number),
                          propertyDescription: "System clock uptime.")
-        case ._timestampDate:
+        case .timestampDate:
             return .init(propertyType: .format(.dateTime),
                          propertyDescription: "The date timestamp when the measurement was taken.")
         case .stepPath:
