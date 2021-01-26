@@ -54,6 +54,9 @@ public struct AsyncActionType : TypeRepresentable, Codable, Hashable {
     /// Weather Services Configuration
     public static let weather: AsyncActionType = "weather"
     
+    /// Distance Recorder Configuration
+    public static let distance: AsyncActionType = "distance"
+    
     /// List of all the standard types.
     public static func allStandardTypes() -> [SerializableResultType] {
         []
@@ -96,8 +99,9 @@ public final class AsyncActionConfigurationSerializer : IdentifiableInterfaceSer
 
     override init() {
         self.examples = [
-            MotionRecorderConfigurationObject.examples().first!,
             AudioRecorderConfigurationObject.examples().first!,
+            DistanceRecorderConfigurationObject.examples().first!,
+            MotionRecorderConfigurationObject.examples().first!,
             WeatherConfigurationObject.examples().first!,
         ]
     }

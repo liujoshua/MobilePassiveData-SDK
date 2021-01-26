@@ -47,6 +47,9 @@ let package = Package(
         .library(
             name: "WeatherRecorder",
             targets: ["WeatherRecorder"]),
+        .library(
+            name: "DistanceRecorder",
+            targets: ["DistanceRecorder"]),
 
     ],
     dependencies: [
@@ -113,6 +116,9 @@ let package = Package(
         
         // Location authorization adaptor for `CoreLocation`. This adaptor can be used for setting
         // up UI for requesting permissions prior to using them in background recorders.
+        //
+        // Use of this library requires registering the `LocationAuthorization` adapter and adding
+        // appropriate privacy keys for using GPS to the app `Info.Plist`.
         .target(name: "LocationAuthorization",
                 dependencies: [
                     "MobilePassiveData",
@@ -131,6 +137,14 @@ let package = Package(
                 "WeatherRecorder",
                 "SharedResourcesTests",
             ]),
+        
+        // Recorder for using `CoreLocation` and `CoreMotion` to record distances travelled.
+        .target(name: "DistanceRecorder",
+                dependencies: [
+                    "JsonModel",
+                    "MobilePassiveData",
+                    "MotionSensor",
+                ]),
         
         // Unit test utilities.
         .target(name: "NSLocaleSwizzle",
