@@ -274,7 +274,11 @@ extension AudioSessionSettings.Mode {
         case .voiceChat:
             return .voiceChat
         case .voicePrompt:
-            return .voicePrompt
+            if #available(iOS 12.0, *) {
+                return .voicePrompt
+            } else {
+                return .spokenAudio
+            }
         case .default:
             return .default
         }
