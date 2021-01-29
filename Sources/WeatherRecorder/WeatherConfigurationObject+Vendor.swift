@@ -35,7 +35,7 @@ import MobilePassiveData
 
 extension WeatherConfigurationObject : AsyncActionVendor {
     public func instantiateController(outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) -> AsyncActionController? {
-        WeatherRecorder(self)
+        WeatherRecorder(self, initialStepPath: initialStepPath)
     }
 }
 

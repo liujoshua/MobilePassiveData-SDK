@@ -48,9 +48,10 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
 
     public let weatherConfiguration: WeatherConfiguration
 
-    public init(_ config: WeatherConfiguration) {
+    public init(_ config: WeatherConfiguration, initialStepPath: String?) {
         self.weatherConfiguration = config
         self.weatherResult = WeatherResult(identifier: config.identifier)
+        self.currentStepPath = initialStepPath ?? ""
         super.init()
     }
     
@@ -62,6 +63,9 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     /// The weather result associated with this recorder.
     public private(set) var weatherResult: WeatherResult
+    
+    /// The current step path.
+    public private(set) var currentStepPath: String
 
     /// Override to request GPS and motion permissions.
     public func requestPermissions(on viewController: Any, _ completion: @escaping AsyncActionCompletionHandler) {
@@ -192,7 +196,7 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     }
     
     public func moveTo(stepPath: String) {
-        // ignored
+        self.currentStepPath = stepPath
     }
     
     // MARK: CLLocationManagerDelegate
