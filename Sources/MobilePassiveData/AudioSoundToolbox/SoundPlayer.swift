@@ -97,9 +97,6 @@ public protocol SoundPlayer {
 /// to play system sounds using `AudioServicesCreateSystemSoundID()`.
 public final class AudioFileSoundPlayer : NSObject, SoundPlayer {
 
-    /// A singleton instance of the audio sound player.
-    public static var shared: SoundPlayer = AudioFileSoundPlayer()
-
     /// Play the given sound.
     /// - parameter sound: The system sound to play.
     public func playSound(_ sound: SoundFile) {

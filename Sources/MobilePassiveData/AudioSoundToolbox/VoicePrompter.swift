@@ -66,6 +66,9 @@ public protocol VoicePrompter {
 public final class TextToSpeechSynthesizer : NSObject, VoicePrompter {
 
     /// A singleton instance of the voice box.
+    /// 
+    /// - note: The singleton is used to allow the UI to speak a prompt *while* transitioning
+    /// between views.
     public static var shared: VoicePrompter = TextToSpeechSynthesizer()
     
     private let speechSynthesizer = AVSpeechSynthesizer()
