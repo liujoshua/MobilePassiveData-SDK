@@ -32,14 +32,6 @@
 
 import Foundation
 
-/// `AudioSessionActivity` is a UI controller that needs to be able to start/stop the audio session
-/// while allowing *other* activities to use the audio session concurrently.
-public protocol AudioSessionActivity : class {
-    
-    /// A short string that uniquely identifies the activity.
-    var identifier: String { get }
-}
-
 #if canImport(AVFoundation) && !os(macOS)
 
 import AVFoundation
@@ -81,8 +73,14 @@ public final class AudioSessionController {
     /// -note: If the app uses background audio, then the developer will need to turn `ON` the
     /// "Background Modes" under the "Capabilities" tab of the Xcode project, and will need to
     /// select "Audio, AirPlay, and Picture in Picture".
-    public func startBackgroundAudioIfNeeded(on activity: AudioSessionActivity) {
-        backgroundAudioIdentifiers.insert(activity.identifier)
+    public func startBackgroundAudioIfNeeded(on activityIdentifier: String) {
+        DispatchQueue.main.async {
+            self._startBackgroundAudioIfNeeded(activityIdentifier)
+        }
+    }
+    
+    private func _startBackgroundAudioIfNeeded(_ activityIdentifier: String) {
+        backgroundAudioIdentifiers.insert(activityIdentifier)
         _startAudioSessionIfNeeded(.backgroundSilence)
         _startBackgroundSilenceIfNeeded()
     }
@@ -92,11 +90,18 @@ public final class AudioSessionController {
     /// - parameters:
     ///     - activity: The activity that is calling the controller.
     ///     - settings: The settings required by the calling activity.
-    public func startAudioSessionIfNeeded(on activity: AudioSessionActivity,
+    public func startAudioSessionIfNeeded(on activityIdentifier: String,
                                           with settings: AudioSessionSettings = AudioSessionSettings()) {
-        guard activityMapping[activity.identifier] == nil else { return }
-        activityMapping[activity.identifier] = settings
-        orderedIdentifiers.append(activity.identifier)
+        DispatchQueue.main.async {
+            self._startAudioSessionIfNeeded(activityIdentifier, settings)
+        }
+    }
+    
+    private func _startAudioSessionIfNeeded(_ activityIdentifier: String,
+                                            _ settings: AudioSessionSettings = AudioSessionSettings()) {
+        guard activityMapping[activityIdentifier] == nil else { return }
+        activityMapping[activityIdentifier] = settings
+        orderedIdentifiers.append(activityIdentifier)
         _startAudioSessionIfNeeded(settings)
     }
     
@@ -134,10 +139,17 @@ public final class AudioSessionController {
     
     /// Stop the audio session.
     /// - parameter activity: The activity that is done using the audio session.
-    public func stopAudioSession(on activity: AudioSessionActivity) {
-        backgroundAudioIdentifiers.remove(activity.identifier)
-        activityMapping[activity.identifier] = nil
-        orderedIdentifiers.removeAll(where: { $0 == activity.identifier })
+    public func stopAudioSession(on activityIdentifier: String) {
+        DispatchQueue.main.async {
+            self._stopAudioSession(activityIdentifier)
+        }
+    }
+    
+    private func _stopAudioSession(_ activityIdentifier: String) {
+        guard activityMapping[activityIdentifier] != nil else { return }
+        backgroundAudioIdentifiers.remove(activityIdentifier)
+        activityMapping[activityIdentifier] = nil
+        orderedIdentifiers.removeAll(where: { $0 == activityIdentifier })
         if let prioritySettings = _prioritySettings() {
             let newSettings = _consolidatedSettings(prioritySettings)
             if newSettings != currentSettings {
@@ -198,9 +210,10 @@ public final class AudioSessionController {
 }
 
 extension AudioSessionSettings {
-    static let backgroundSilence: AudioSessionSettings = AudioSessionSettings(category: .continuousPlayback,
-                                                                                  mode: .spokenAudio,
-                                                                                  mixingOptions: .mixWithOthers)
+    static let backgroundSilence: AudioSessionSettings =
+        AudioSessionSettings(category: .continuousPlayback,
+                             mode: .spokenAudio,
+                             mixingOptions: .interruptSpokenAudioAndMixWithOthers)
 }
 
 /// An audio player that plays the background sound used to keep the motion sensors active. This is
@@ -305,15 +318,20 @@ extension AudioSessionSettings.MixingOptions {
 /// Applications that do not support audio sessions are currently not supported.
 public final class AudioSessionController {
     public static let shared: AudioSessionController = AudioSessionController()
+    
+    public func startBackgroundAudioIfNeeded(on activityIdentifier: String) {
+        // TODO: syoung 12/18/2020 Implement support when/if needed for these platforms.
+        print("WARNING! Audio session support is not implemented for this platform.")
+    }
 
-    public func startAudioSessionIfNeeded(on activity: AudioSessionActivity,
+    public func startAudioSessionIfNeeded(on activityIdentifier: String,
                                           with settings: AudioSessionSettings = AudioSessionSettings()) {
         // TODO: syoung 12/18/2020 Implement support when/if needed for these platforms.
         print("WARNING! Audio session support is not implemented for this platform.")
     }
     
     /// Stop the audio session.
-    public func stopAudioSession(on activity: AudioSessionActivity) {
+    public func stopAudioSession(on activityIdentifier: String) {
         // TODO: syoung 12/18/2020 Implement support when/if needed for these platforms.
         print("WARNING! Audio session support is not implemented for this platform.")
     }

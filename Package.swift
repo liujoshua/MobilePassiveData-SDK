@@ -17,9 +17,7 @@ let package = Package(
         // MARK: Main Library
         .library(
             name: "MobilePassiveData",
-            targets: ["MobilePassiveData",
-                      "ExceptionHandler",
-            ]),
+            targets: ["MobilePassiveData"]),
         
         // MARK: Additional Libraries
         //
@@ -130,6 +128,7 @@ let package = Package(
                 dependencies: [
                     "JsonModel",
                     "MobilePassiveData",
+                    "LocationAuthorization",
                 ]),
         .testTarget(
             name: "WeatherRecorderTests",
@@ -144,6 +143,7 @@ let package = Package(
                     "JsonModel",
                     "MobilePassiveData",
                     "MotionSensor",
+                    "LocationAuthorization",
                 ]),
         
         // Unit test utilities.

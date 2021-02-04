@@ -39,17 +39,6 @@ import MobilePassiveData
 import JsonModel
 import MotionSensor
 
-//extension DistanceRecorderConfiguration : AsyncActionVendor {
-//
-//    /// Instantiate a `DistanceRecorder` (iOS only).
-//    /// - parameter taskViewModel: The current task path to use to initialize the controller.
-//    /// - returns: A new instance of `DistanceRecorder` or `nil` if the platform does not
-//    ///            support distance recording.
-//    public func instantiateController(with taskViewModel: PathComponent) -> AsyncAction? {
-//        return DistanceRecorder(configuration: self, taskViewModel: taskViewModel, outputDirectory: taskViewModel.outputDirectory)
-//    }
-//}
-
 
 /// `DistanceRecorder` is intended to be used for recording location where the participant is walking,
 /// running, cycling, or other activities **outdoors** where the distance travelled is of interest. By
