@@ -64,20 +64,26 @@ public protocol VoicePrompter {
 /// `TextToSpeechSynthesizer` is a concrete implementation of the `VoicePrompter` protocol that
 /// uses the `AVSpeechSynthesizer` to synthesize text to sound.
 public final class TextToSpeechSynthesizer : NSObject, VoicePrompter {
-
-    /// A singleton instance of the voice box.
-    /// 
-    /// - note: The singleton is used to allow the UI to speak a prompt *while* transitioning
-    /// between views.
-    public static var shared: VoicePrompter = TextToSpeechSynthesizer()
+    
+    /// The language code to use for the speech voice.
+    public var languageCode: String
+    
+    /// A specific identifier for the `AVSpeechSynthesisVoice` to use.
+    public var voiceIdentifier: String?
     
     private let speechSynthesizer = AVSpeechSynthesizer()
     
     private var _completionHandlers: [String: VoicePrompterCompletionHandler] = [:]
     
-    public override init() {
+    public override init(languageCode: String = AVSpeechSynthesisVoice.currentLanguageCode()) {
+        self.languageCode = languageCode
         super.init()
         self.speechSynthesizer.delegate = self
+        self.speechSynthesizer.usesApplicationAudioSession = true
+        
+        // TODO: FIXME syoung 02/05/2021 in iOS 14.3, the enhanced voice which is default for the
+        // US is broken so this is a work-around for that bug.
+        self.voiceIdentifier = (languageCode == "en-US") ? "com.apple.ttsbundle.siri_female_en-US_compact" : nil
     }
     
     deinit {
@@ -110,6 +116,14 @@ public final class TextToSpeechSynthesizer : NSObject, VoicePrompter {
         
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+    
+        if let voiceId = self.voiceIdentifier, let voice = AVSpeechSynthesisVoice(identifier: voiceId) {
+            utterance.voice = voice
+        }
+        else {
+            utterance.voice = AVSpeechSynthesisVoice(language: self.languageCode)
+        }
+        
         _completionHandlers[text] = completion
         
         speechSynthesizer.speak(utterance)
