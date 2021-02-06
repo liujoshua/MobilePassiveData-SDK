@@ -66,24 +66,25 @@ public protocol VoicePrompter {
 public final class TextToSpeechSynthesizer : NSObject, VoicePrompter {
     
     /// The language code to use for the speech voice.
-    public var languageCode: String
+    public let languageCode: String
     
     /// A specific identifier for the `AVSpeechSynthesisVoice` to use.
-    public var voiceIdentifier: String?
+    public let voiceIdentifier: String?
     
     private let speechSynthesizer = AVSpeechSynthesizer()
     
     private var _completionHandlers: [String: VoicePrompterCompletionHandler] = [:]
     
-    public override init(languageCode: String = AVSpeechSynthesisVoice.currentLanguageCode()) {
+    public init(languageCode: String = AVSpeechSynthesisVoice.currentLanguageCode(),
+                voiceIdentifier: String? = nil) {
         self.languageCode = languageCode
+        self.voiceIdentifier = voiceIdentifier ?? (
+            // syoung 02/05/2021 in iOS 14.4, the enhanced voice which is default for the US is broken
+            // so this is a work-around for that bug.
+            (languageCode == "en-US") ? "com.apple.ttsbundle.siri_female_en-US_compact" : nil
+        )
         super.init()
         self.speechSynthesizer.delegate = self
-        self.speechSynthesizer.usesApplicationAudioSession = true
-        
-        // TODO: FIXME syoung 02/05/2021 in iOS 14.3, the enhanced voice which is default for the
-        // US is broken so this is a work-around for that bug.
-        self.voiceIdentifier = (languageCode == "en-US") ? "com.apple.ttsbundle.siri_female_en-US_compact" : nil
     }
     
     deinit {
