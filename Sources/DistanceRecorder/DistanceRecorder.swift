@@ -48,7 +48,7 @@ import MotionSensor
 /// participant's privacy is respected.
 ///
 /// At the end of the motion travelled step, the recorder also uses CoreMotion to query the pedometer
-/// for the overall distance and step count as measured by the pedometer which are then added to the
+/// for the overall distance and step count as measured by the pedometer, which are then added to the
 /// `CollectionResult` returned by this recorder when it is stopped.
 ///
 /// This recorder is only available on iOS devices. CoreMotion is not supported by other platforms.
