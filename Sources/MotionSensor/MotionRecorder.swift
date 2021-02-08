@@ -58,7 +58,7 @@ extension Notification.Name {
 @available(iOS 10.0, *)
 public class MotionRecorder : SampleRecorder {
     
-    let audioSessionIdentifier = "org.sagebase.MotionRecorder"
+    let audioSessionIdentifier = "org.sagebase.MotionRecorder.\(UUID())"
     
     public init(configuration: MotionRecorderConfiguration, outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) {
         super.init(configuration: configuration, outputDirectory: outputDirectory, initialStepPath: initialStepPath, sectionIdentifier: sectionIdentifier)

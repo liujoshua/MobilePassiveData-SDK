@@ -51,7 +51,7 @@ import AVFoundation
 /// - seealso: `AudioRecorderConfiguration`.
 public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate {
     
-    let audioSessionIdentifier = "org.sagebase.AudioRecorder"
+    let audioSessionIdentifier = "org.sagebase.AudioRecorder.\(UUID())"
 
     deinit {
         
