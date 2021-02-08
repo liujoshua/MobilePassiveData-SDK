@@ -254,7 +254,7 @@ extension DistanceRecord : DocumentableStruct {
         case .altitude:
             return .init(propertyType: .primitive(.number), propertyDescription: "The altitude of the location in meters. Can be positive (above sea level) or negative (below sea level).")
         case .totalDistance:
-            return .init(propertyType: .primitive(.number), propertyDescription: "Sum of the relative distance measurements if the participant is supposed to be moving; null if participant is suppose to be standing still.")
+            return .init(propertyType: .primitive(.number), propertyDescription: "Sum of the relative distance measurements if the participant is supposed to be moving; null if participant is supposed to be standing still.")
         case .course:
             return .init(propertyType: .primitive(.number), propertyDescription: "The course of the location in degrees true North; null if course is invalid. Range: 0.0 - 359.9 degrees, 0 being true North.")
         case .bearingRadians:
