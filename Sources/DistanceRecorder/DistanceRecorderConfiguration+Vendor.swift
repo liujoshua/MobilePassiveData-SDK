@@ -1,7 +1,8 @@
 //
-//  WeatherServiceConfiguration.swift
+//  DistanceRecorderConfiguration+Vendor.swift
+//  
 //
-//  Copyright © 2020-2021 Sage Bionetworks. All rights reserved.
+//  Copyright © 2018-2021 Sage Bionetworks. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,26 +31,20 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#if os(iOS)
+
 import Foundation
 import MobilePassiveData
 
-extension WeatherConfigurationObject : AsyncActionVendor {
+extension DistanceRecorderConfigurationObject : AsyncActionVendor {
     public func instantiateController(outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) -> AsyncActionController? {
-        WeatherRecorder(self, initialStepPath: initialStepPath)
-    }
-}
-
-extension WeatherServiceConfiguration {
-    func instantiateDefaultService() -> WeatherService? {
-        switch self.providerName {
-        case .airNow:
-            return AirNowService(configuration: self)
-        case .openWeather:
-            return OpenWeatherService(configuration: self)
-        default:
-            return nil
-        }
+        DistanceRecorder(configuration: self,
+                         outputDirectory: outputDirectory,
+                         initialStepPath: initialStepPath,
+                         sectionIdentifier: sectionIdentifier)
     }
 }
 
 // TODO: syoung 01/14/2021 Create a Kotlin/Native model object and implement extensions.
+
+#endif

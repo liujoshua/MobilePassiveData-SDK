@@ -1,7 +1,7 @@
 //
-//  WeatherServiceConfiguration.swift
+//  DistanceRecorderConfiguration.swift
 //
-//  Copyright © 2020-2021 Sage Bionetworks. All rights reserved.
+//  Copyright © 2018-2021 Sage Bionetworks. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,25 +31,36 @@
 //
 
 import Foundation
-import MobilePassiveData
+import JsonModel
 
-extension WeatherConfigurationObject : AsyncActionVendor {
-    public func instantiateController(outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) -> AsyncActionController? {
-        WeatherRecorder(self, initialStepPath: initialStepPath)
+public protocol DistanceRecorderConfiguration : RecorderConfiguration {
+    
+    /// Identifier for the step that records distance travelled. The recorder uses this step to record
+    /// distance travelled while the other steps in the task are assumed to be standing still.
+    var motionStepIdentifier: String? { get }
+    
+    /// Set the flag to `true` to encode the samples as a CSV file.
+    var usesCSVEncoding : Bool?  { get }
+    
+}
+
+extension DistanceRecorderConfiguration {
+    
+    /// Returns true. Background audio is required for this configuration.
+    public var requiresBackgroundAudio: Bool {
+        return true
+    }
+    
+    /// Returns `location` and `motion` on iOS. Returns an empty set on platforms that do not
+    /// support distance recording.
+    /// - note: The use of this recorder requires adding “Privacy - Motion Usage Description” to the
+    ///         application "info.plist" file.
+    public var permissionTypes: [PermissionType] {
+        #if os(iOS)
+            return [StandardPermissionType.location, StandardPermissionType.motion]
+        #else
+            return []
+        #endif
     }
 }
 
-extension WeatherServiceConfiguration {
-    func instantiateDefaultService() -> WeatherService? {
-        switch self.providerName {
-        case .airNow:
-            return AirNowService(configuration: self)
-        case .openWeather:
-            return OpenWeatherService(configuration: self)
-        default:
-            return nil
-        }
-    }
-}
-
-// TODO: syoung 01/14/2021 Create a Kotlin/Native model object and implement extensions.

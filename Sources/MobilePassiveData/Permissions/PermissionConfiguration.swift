@@ -1,7 +1,8 @@
 //
-//  WeatherServiceConfiguration.swift
+//  PermissionsConfiguration.swift
 //
-//  Copyright © 2020-2021 Sage Bionetworks. All rights reserved.
+//
+//  Copyright © 2017-2021 Sage Bionetworks. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,25 +32,11 @@
 //
 
 import Foundation
-import MobilePassiveData
 
-extension WeatherConfigurationObject : AsyncActionVendor {
-    public func instantiateController(outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) -> AsyncActionController? {
-        WeatherRecorder(self, initialStepPath: initialStepPath)
-    }
+/// A model object that defines a configuration for permissions to be requested either as a part of
+/// a step or an async action.
+public protocol PermissionsConfiguration {
+    
+    /// List of the permissions required for this action.
+    var permissionTypes: [PermissionType] { get }
 }
-
-extension WeatherServiceConfiguration {
-    func instantiateDefaultService() -> WeatherService? {
-        switch self.providerName {
-        case .airNow:
-            return AirNowService(configuration: self)
-        case .openWeather:
-            return OpenWeatherService(configuration: self)
-        default:
-            return nil
-        }
-    }
-}
-
-// TODO: syoung 01/14/2021 Create a Kotlin/Native model object and implement extensions.

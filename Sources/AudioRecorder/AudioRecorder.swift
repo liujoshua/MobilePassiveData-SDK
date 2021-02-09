@@ -49,16 +49,21 @@ import AVFoundation
 /// - note: This recorder is only available on iOS devices.
 ///
 /// - seealso: `AudioRecorderConfiguration`.
-public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessionActivity {
+public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate {
+    
+    let audioSessionIdentifier = "org.sagebase.AudioRecorder.\(UUID())"
 
     deinit {
+        
         // Belt and suspenders. There is apparently a bug that can cause a crash if the timer is not
         // cancelled before it is deallocated. syoung 09/03/2020
         meterTimer?.cancel()
         meterTimer = nil
+        
+        // Stop the recorder and remove self from audio session controller.
         audioRecorder?.stop()
         audioRecorder = nil
-        AudioSessionController.shared.stopAudioSession(on: self)
+        AudioSessionController.shared.stopAudioSession(on: audioSessionIdentifier)
     }
     
     /// The audio configuration for this recorder.
@@ -77,7 +82,7 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessi
     /// Override to implement requesting permission to access the participant's microphone.
     override public func requestPermissions(on viewController: Any, _ completion: @escaping AsyncActionCompletionHandler) {
         self.updateStatus(to: .requestingPermission , error: nil)
-        AudioSessionController.shared.startAudioSessionIfNeeded(on: self, with: .recordDBLevel)
+        AudioSessionController.shared.startAudioSessionIfNeeded(on: audioSessionIdentifier, with: .recordDBLevel)
         if AudioRecorderAuthorization.authorizationStatus() == .authorized {
             self.updateStatus(to: .permissionGranted , error: nil)
             completion(self, nil, nil)
@@ -153,6 +158,7 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessi
         
         DispatchQueue.main.async {
             
+            // Append the audio file to the results *if* it should be saved.
             let saveRecording = self.audioConfiguration?.saveAudioFile ?? false
             if saveRecording,
                self.status == .processingResults,
@@ -165,26 +171,30 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate, AudioSessi
             // Stop the recording before calling completion.
             self.stopRecording(!saveRecording)
 
-            // Call completion after results are processed but before cleanup.
-            // This allows the UI to go forward while the recorder finishing.
-            completion(.stopping)
-            
-            self.stopInterruptionObserver()
-            self.stopTimer()
-            AudioSessionController.shared.stopAudioSession(on: self)
-            
-            self.updateStatus(to: .finished, error: nil)
+            // And we're done!
+            completion(.finished)
         }
     }
     
     private func stopRecording(_ shouldDelete: Bool) {
-        if let recorder = self.audioRecorder {
-            recorder.stop()
-            if shouldDelete {
-                recorder.deleteRecording()
-            }
-        }
+        guard let recorder = self.audioRecorder else { return }
         self.audioRecorder = nil
+        
+        // Stop the recorder.
+        recorder.stop()
+        recorder.delegate = nil
+        
+        // Stop listeners.
+        self.stopInterruptionObserver()
+        self.stopTimer()
+        
+        // Stop the audio session.
+        AudioSessionController.shared.stopAudioSession(on: self.audioSessionIdentifier)
+        
+        // Delete the recording if we're not saving it.
+        if shouldDelete {
+            recorder.deleteRecording()
+        }
     }
     
     // MARK: Record decibel level

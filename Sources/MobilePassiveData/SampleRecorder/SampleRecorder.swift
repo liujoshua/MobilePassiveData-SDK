@@ -254,6 +254,10 @@ open class SampleRecorder : NSObject, AsyncActionController {
     public final func moveTo(stepPath: String) {
         self.currentStepPath = stepPath
         _writeMarkers()
+        self.didMoveTo(stepPath: stepPath)
+    }
+    
+    open func didMoveTo(stepPath: String) {
     }
     
     /// This method should be called on the main thread with the completion handler also called on

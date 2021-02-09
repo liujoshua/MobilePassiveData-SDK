@@ -44,19 +44,22 @@ public struct AsyncActionType : TypeRepresentable, Codable, Hashable {
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
-
-    /// Motion Recorder Configuration.
-    public static let motion: AsyncActionType = "motion"
+    
+    /// Distance Recorder Configuration
+    public static let distance: AsyncActionType = "distance"
     
     /// Microphone Recorder Configuration.
     public static let microphone: AsyncActionType = "microphone"
+
+    /// Motion Recorder Configuration.
+    public static let motion: AsyncActionType = "motion"
     
     /// Weather Services Configuration
     public static let weather: AsyncActionType = "weather"
     
     /// List of all the standard types.
-    public static func allStandardTypes() -> [SerializableResultType] {
-        []
+    public static func allStandardTypes() -> [AsyncActionType] {
+        [.distance, .microphone, .motion, .weather]
     }
 }
 
@@ -96,8 +99,9 @@ public final class AsyncActionConfigurationSerializer : IdentifiableInterfaceSer
 
     override init() {
         self.examples = [
-            MotionRecorderConfigurationObject.examples().first!,
             AudioRecorderConfigurationObject.examples().first!,
+            DistanceRecorderConfigurationObject.examples().first!,
+            MotionRecorderConfigurationObject.examples().first!,
             WeatherConfigurationObject.examples().first!,
         ]
     }

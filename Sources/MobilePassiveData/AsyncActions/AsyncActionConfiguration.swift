@@ -43,13 +43,17 @@ import Foundation
 ///
 /// - seealso: `AsyncActionController`.
 ///
-public protocol AsyncActionConfiguration {
+public protocol AsyncActionConfiguration : PermissionsConfiguration {
     
     /// A short string that uniquely identifies the asynchronous action within the task.
     var identifier : String { get }
     
     /// The type of the async action.
     var typeName : String { get }
+    
+    /// An identifier marking the step at which to start the action. If `nil`, then the action will
+    /// be started when the task is started.
+    var startStepIdentifier: String? { get }
     
     /// Validate the async action to check for any configuration that should throw an error.
     func validate() throws

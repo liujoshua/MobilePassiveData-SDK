@@ -56,14 +56,16 @@ extension Notification.Name {
 ///
 /// - seealso: `MotionRecorderType`, `MotionRecorderConfiguration`, and `MotionRecord`.
 @available(iOS 10.0, *)
-public class MotionRecorder : SampleRecorder, AudioSessionActivity {
+public class MotionRecorder : SampleRecorder {
+    
+    let audioSessionIdentifier = "org.sagebase.MotionRecorder.\(UUID())"
     
     public init(configuration: MotionRecorderConfiguration, outputDirectory: URL, initialStepPath: String?, sectionIdentifier: String?) {
         super.init(configuration: configuration, outputDirectory: outputDirectory, initialStepPath: initialStepPath, sectionIdentifier: sectionIdentifier)
     }
     
     deinit {
-        AudioSessionController.shared.stopAudioSession(on: self)
+        AudioSessionController.shared.stopAudioSession(on: self.audioSessionIdentifier)
     }
     
     /// The currently-running instance, if any. You should confirm that this is nil
@@ -154,7 +156,7 @@ public class MotionRecorder : SampleRecorder, AudioSessionActivity {
             guard let strongSelf = self else { return }
             strongSelf._startNextRunLoop()
             if strongSelf.motionConfiguration?.requiresBackgroundAudio ?? false {
-                AudioSessionController.shared.startBackgroundAudioIfNeeded(on: strongSelf)
+                AudioSessionController.shared.startBackgroundAudioIfNeeded(on: strongSelf.audioSessionIdentifier)
             }
         }
     }
@@ -268,7 +270,7 @@ public class MotionRecorder : SampleRecorder, AudioSessionActivity {
 
         DispatchQueue.main.async {
             
-            AudioSessionController.shared.stopAudioSession(on: self)
+            AudioSessionController.shared.stopAudioSession(on: self.audioSessionIdentifier)
 
             self.stopInterruptionObserver()
 

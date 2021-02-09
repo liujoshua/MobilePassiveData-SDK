@@ -73,6 +73,9 @@ public protocol AsyncActionController : class {
     /// The status of the controller.
     var status: AsyncActionStatus { get }
     
+    /// The current `stepPath` to record to log samples.
+    var currentStepPath: String { get }
+    
     /// The last error on the controller.
     /// - note: Under certain circumstances, getting an error will not result in a terminal failure
     /// of the controller. For example, if a controller is both processing motion and camera
