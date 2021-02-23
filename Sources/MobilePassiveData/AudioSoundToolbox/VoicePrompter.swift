@@ -65,6 +65,9 @@ public protocol VoicePrompter {
 /// uses the `AVSpeechSynthesizer` to synthesize text to sound.
 public final class TextToSpeechSynthesizer : NSObject, VoicePrompter {
     
+    /// The text-to-speech synthesizer needs to be a singleton to allow crossing UI transition boundaries.
+    public static let shared = TextToSpeechSynthesizer()
+    
     /// The language code to use for the speech voice.
     public let languageCode: String
     
