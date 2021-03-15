@@ -266,7 +266,7 @@ public class DistanceRecorder : SampleRecorder, CLLocationManagerDelegate {
                     // GPS distance.
                     _addPedometerData()
                     
-                    let gpsDistanceResult = JsonElementResultObject(
+                    let gpsDistanceResult = AnswerResultObject(
                         identifier: ResultIdentifier.gpsDistance.stringValue,
                         value: .number(totalDistance))
                     self.appendResults(gpsDistanceResult)
@@ -361,12 +361,12 @@ public class DistanceRecorder : SampleRecorder, CLLocationManagerDelegate {
 
     private func _recordPedometerData(_ data: CMPedometerData) {
 
-        let stepCountResult = JsonElementResultObject(
+        let stepCountResult = AnswerResultObject(
             identifier: ResultIdentifier.stepCount.stringValue,
             value: .integer(data.numberOfSteps.intValue))
         self.appendResults(stepCountResult)
 
-        let pedometerDistanceResult = JsonElementResultObject(
+        let pedometerDistanceResult = AnswerResultObject(
             identifier: ResultIdentifier.pedometerDistance.stringValue,
             value: .number(data.distance?.doubleValue ?? 0.0))
         self.appendResults(pedometerDistanceResult)
