@@ -42,9 +42,9 @@ extension SerializableResultType {
 /// Because this result must be mutable, it is defined as a class.
 public final class WeatherResult : SerializableResultData {
     private enum CodingKeys : String, CodingKey, CaseIterable {
-        case identifier, serializableResultType = "type", startDate, endDate, weather, airQuality
+        case identifier, serializableType = "type", startDate, endDate, weather, airQuality
     }
-    public private(set) var serializableResultType: SerializableResultType = .weather
+    public private(set) var serializableType: SerializableResultType = .weather
 
     public let identifier: String
     public var startDate: Date = Date()
@@ -54,6 +54,15 @@ public final class WeatherResult : SerializableResultData {
     
     public init(identifier: String) {
         self.identifier = identifier
+    }
+    
+    public func deepCopy() -> WeatherResult {
+        let copy = WeatherResult(identifier: identifier)
+        copy.startDate = startDate
+        copy.endDate = endDate
+        copy.weather = weather?.deepCopy()
+        copy.airQuality = airQuality?.deepCopy()
+        return copy
     }
 }
 
@@ -66,7 +75,7 @@ extension WeatherResult : DocumentableStruct {
     public static func isRequired(_ codingKey: CodingKey) -> Bool {
         guard let key = codingKey as? CodingKeys else { return false }
         switch key {
-        case .identifier, .serializableResultType, .startDate:
+        case .identifier, .serializableType, .startDate:
             return true
         default:
             return false
@@ -78,7 +87,7 @@ extension WeatherResult : DocumentableStruct {
             throw DocumentableError.invalidCodingKey(codingKey, "\(codingKey) is not recognized for this class")
         }
         switch key {
-        case .serializableResultType:
+        case .serializableType:
             return .init(constValue: SerializableResultType.weather)
         case .identifier:
             return .init(propertyType: .primitive(.string))
@@ -193,13 +202,17 @@ public struct WeatherServiceResult : Codable, Equatable {
 }
 
 extension WeatherServiceResult : SerializableResultData {
-    public var serializableResultType: SerializableResultType {
+    public var serializableType: SerializableResultType {
         .init(rawValue: self.serviceType.rawValue)
     }
     
     public var endDate: Date {
         get { startDate }
         set { }
+    }
+    
+    public func deepCopy() -> WeatherServiceResult {
+        self
     }
 }
 
@@ -334,13 +347,17 @@ public struct AirQualityServiceResult : Codable, Equatable {
 }
 
 extension AirQualityServiceResult : SerializableResultData {
-    public var serializableResultType: SerializableResultType {
+    public var serializableType: SerializableResultType {
         .init(rawValue: serviceType.rawValue)
     }
 
     public var endDate: Date {
         get { startDate }
         set {} // ignored
+    }
+    
+    public func deepCopy() -> AirQualityServiceResult {
+        self
     }
 }
 

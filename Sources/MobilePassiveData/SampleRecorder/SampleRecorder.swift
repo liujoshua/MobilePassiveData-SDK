@@ -562,12 +562,12 @@ open class SampleRecorder : NSObject, AsyncActionController {
         // The result identifier is the logger identifer without the section identifier prefix
         let identifier = fileHandle.identifier.hasPrefix(filePrefix) ?
             String(fileHandle.identifier.dropFirst(filePrefix.count)) : fileHandle.identifier
-        let fileResult = FileResultObject(identifier: identifier)
+        var fileResult = FileResultObject(identifier: identifier,
+                                          url: fileHandle.url,
+                                          contentType: fileHandle.contentType,
+                                          startUptime: self.clock.startSystemUptime)
         fileResult.startDate = self.startDate
         fileResult.endDate = Date()
-        fileResult.url = fileHandle.url
-        fileResult.startUptime = self.clock.startSystemUptime
-        fileResult.contentType = fileHandle.contentType
         return fileResult
     }
 

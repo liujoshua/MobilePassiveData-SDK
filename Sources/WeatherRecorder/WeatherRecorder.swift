@@ -58,7 +58,7 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     /// The delegate used for a callback when the location service fails.
     public weak var delegate: AsyncActionControllerDelegate?
     
-    /// The location manager is used to ping the particpant's current location.
+    /// The location manager is used to ping the participant's current location.
     public private(set) var locationManager: CLLocationManager?
     
     /// The weather result associated with this recorder.
