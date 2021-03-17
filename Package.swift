@@ -124,6 +124,9 @@ let package = Package(
         
         // This target pings the user's location and then uses that to query weather services for
         // current conditions.
+        //
+        // Use of this library requires adding appropriate privacy keys for using GPS to the
+        // app `Info.Plist`.
         .target(name: "WeatherRecorder",
                 dependencies: [
                     "JsonModel",
@@ -138,6 +141,9 @@ let package = Package(
             ]),
         
         // Recorder for using `CoreLocation` and `CoreMotion` to record distances travelled.
+        //
+        // Use of this library requires adding appropriate privacy keys for using GPS and
+        // motion sensors to the app `Info.Plist`.
         .target(name: "DistanceRecorder",
                 dependencies: [
                     "JsonModel",

@@ -59,6 +59,15 @@ public protocol AsyncActionControllerDelegate : class {
     /// Method called when the controller fails. The delegate is responsible
     /// for handling the UI/UX and graceful exit (if needed) for failures.
     func asyncAction(_ controller: AsyncActionController, didFailWith error: Error)
+    
+    /// Find an answer with a given `identifier`. Typically, this will be used to allow the delegate to
+    /// get answers to demographics questions from the data sources available to the delegate. The
+    /// method returns a `JsonElement` to allow for a cross-platform compatible value that is of a
+    /// known type (ie. JSON).
+    ///
+    /// - parameter identifier: The identifier associated with the result.
+    /// - returns: The result or `nil` if not found.
+    func findAnswerValue(with identifier: String) -> JsonElement?
 }
 
 /// A controller for an async action configuration.
