@@ -69,11 +69,11 @@ public final class LocationAuthorization : NSObject, PermissionAuthorizationAdap
             else {
                 return (.notDetermined, nil)
         }
-        return (Self.authorizationStatus(for: permissionType), permissionType)
+        return (authorizationStatus(for: permissionType), permissionType)
     }
     
     /// Returns authorization status for `.location` and `.locationWhenInUse` permissions.
-    public static func authorizationStatus(for permission: StandardPermissionType) -> PermissionAuthorizationStatus {
+    public func authorizationStatus(for permission: StandardPermissionType) -> PermissionAuthorizationStatus {
         switch permission {
         case .location:
             return _locationAuthorizationStatus(true)
@@ -84,42 +84,63 @@ public final class LocationAuthorization : NSObject, PermissionAuthorizationAdap
         }
     }
     
-    private static func _locationAuthorizationStatus(_ requiresBackground: Bool) -> PermissionAuthorizationStatus {
-        _convertAuthStatus(CLLocationManager.authorizationStatus(), requiresBackground: requiresBackground)
+    private func _locationAuthorizationStatus(_ requiresBackground: Bool) -> PermissionAuthorizationStatus {
+        Self.authorization(for: self.locationManager, requiresBackground: requiresBackground)
     }
     
-    private lazy var locationManager: CLLocationManager = {
-        let manager = CLLocationManager()
-        manager.delegate = self
-        return manager
-    }()
+    public static func authorization(for manager: CLLocationManager, requiresBackground: Bool) -> PermissionAuthorizationStatus {
+        var status: CLAuthorizationStatus!
+        if Thread.isMainThread {
+            status = _getAuthStatus(manager)
+        }
+        else {
+            DispatchQueue.main.sync {
+                status = _getAuthStatus(manager)
+            }
+        }
+        return _convertAuthStatus(status, requiresBackground: requiresBackground)
+    }
+    
+    private static func _getAuthStatus(_ manager: CLLocationManager) -> CLAuthorizationStatus {
+        if #available(iOS 14, macOS 11, tvOS 14, watchOS 7, *) {
+            return manager.authorizationStatus
+        }
+        else {
+            return CLLocationManager.authorizationStatus()
+        }
+    }
+    
+    private var locationManager: CLLocationManager = CLLocationManager()
     
     private var _completion: ((PermissionAuthorizationStatus, Error?) -> Void)?
     private var _requestingType: StandardPermissionType?
     
     /// Requests permission to access the device location.
     public func requestAuthorization(for permission: Permission, _ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
-        let (status, pType) = self._authStatus(for: permission.identifier)
-        guard status == .notDetermined, let permissionType = pType else {
-            completion(status, nil)
-            return
+        DispatchQueue.main.async {
+            let (status, pType) = self._authStatus(for: permission.identifier)
+            guard status == .notDetermined, let permissionType = pType else {
+                completion(status, nil)
+                return
+            }
+            
+            self._completion = completion
+            self._requestingType = permissionType
+            self.locationManager.delegate = self
+            
+            #if os(macOS)
+            self.locationManager.requestAlwaysAuthorization()
+            #elseif os(tvOS)
+            self.locationManager.requestWhenInUseAuthorization()
+            #else
+            switch permissionType {
+            case .location:
+                self.locationManager.requestAlwaysAuthorization()
+            default:
+                self.locationManager.requestWhenInUseAuthorization()
+            }
+            #endif
         }
-        
-        _completion = completion
-        _requestingType = permissionType
-        
-        #if os(macOS)
-        locationManager.requestAlwaysAuthorization()
-        #elseif os(tvOS)
-        locationManager.requestWhenInUseAuthorization()
-        #else
-        switch permissionType {
-        case .location:
-            locationManager.requestAlwaysAuthorization()
-        default:
-            locationManager.requestWhenInUseAuthorization()
-        }
-        #endif
     }
     
     private static func _convertAuthStatus(_ clAuthStatus: CLAuthorizationStatus, requiresBackground: Bool) -> PermissionAuthorizationStatus {
@@ -137,16 +158,27 @@ public final class LocationAuthorization : NSObject, PermissionAuthorizationAdap
         }
     }
     
+    @available(iOS 14.0, macOS 11, tvOS 14, watchOS 7, *)
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let rsdStatus = Self._convertAuthStatus(manager.authorizationStatus, requiresBackground: _requestingType == .location )
+        _completeRequest(rsdStatus, nil)
+    }
+    
     public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        guard status != .notDetermined else { return }
         let rsdStatus = Self._convertAuthStatus(status, requiresBackground: _requestingType == .location )
-        _completion?(rsdStatus, nil)
-        _completion = nil
+        _completeRequest(rsdStatus, nil)
     }
     
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        _completion?(.denied, error)
-        _completion = nil
+        _completeRequest(.denied, error)
+    }
+    
+    private func _completeRequest(_ status: PermissionAuthorizationStatus, _ error: Error?) {
+        guard status != .notDetermined else { return }
+        DispatchQueue.main.async {
+            self._completion?(status, error)
+            self._completion = nil
+        }
     }
 }
 

@@ -34,6 +34,7 @@ import Foundation
 import CoreLocation
 import MobilePassiveData
 import JsonModel
+import LocationAuthorization
 
 public typealias WeatherServiceCompletionHandler = (WeatherService, [ResultData]?, Error?) -> Void
 
@@ -71,9 +72,8 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     public func requestPermissions(on viewController: Any, _ completion: @escaping AsyncActionCompletionHandler) {
         
         // Get the current status and exit early if the status is restricted or denied.
-        let status = CLLocationManager.authorizationStatus()
+        let status = LocationAuthorization.shared.authorizationStatus(for: StandardPermissionType.locationWhenInUse.identifier)
         if status == .denied || status == .restricted {
-            let status: PermissionAuthorizationStatus = (status == .restricted) ? .restricted : .denied
             _serviceFailed(status: status)
             completion(self, nil, self.error)
             return
@@ -95,7 +95,7 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
             completion(self, nil, nil)
         }
     }
-    
+        
     private var _permissionCompletion: AsyncActionCompletionHandler?
     private var _startCompletion: AsyncActionCompletionHandler?
     
@@ -132,13 +132,8 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     private func _requestLocation(_ completion: AsyncActionCompletionHandler?) {
         guard self.status < .running else { return }
-        let status = CLLocationManager.authorizationStatus()
-        #if os(macOS)
-        let granted = status == .authorizedAlways
-        #else
-        let granted = status == .authorizedAlways || status == .authorizedWhenInUse
-        #endif
-        guard granted else {
+        let status = LocationAuthorization.authorization(for: self.locationManager ?? CLLocationManager(), requiresBackground: false)
+        guard status == .authorized else {
             _serviceFailed(status: .denied)
             DispatchQueue.main.async {
                 completion?(self, nil, self.error)
@@ -203,7 +198,7 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         guard self.status <= .running else { return }
-        let status = CLLocationManager.authorizationStatus()
+        let status = LocationAuthorization.authorization(for: manager, requiresBackground: false)
         guard status != .notDetermined else { return }
         if status == .denied || status == .restricted {
             let status: PermissionAuthorizationStatus = (status == .restricted) ? .restricted : .denied

@@ -87,16 +87,18 @@ public final class AudioRecorderAuthorization : PermissionAuthorizationAdaptor {
 
     /// Request authorization to record.
     static public func requestAuthorization(_ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
-        #if os(iOS)
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            if granted {
-                completion(.authorized, nil)
-            } else {
-                completion(.denied, nil)
+        DispatchQueue.main.async {
+            #if os(iOS)
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                if granted {
+                    completion(.authorized, nil)
+                } else {
+                    completion(.denied, nil)
+                }
             }
+            #else
+            completion(.authorized, nil)
+            #endif
         }
-        #else
-        completion(.authorized, nil)
-        #endif
     }
 }
