@@ -107,12 +107,19 @@ public final class LocationAuthorization : NSObject, PermissionAuthorizationAdap
         
         _completion = completion
         _requestingType = permissionType
+        
+        #if os(macOS)
+        locationManager.requestAlwaysAuthorization()
+        #elseif os(tvOS)
+        locationManager.requestWhenInUseAuthorization()
+        #else
         switch permissionType {
         case .location:
             locationManager.requestAlwaysAuthorization()
         default:
             locationManager.requestWhenInUseAuthorization()
         }
+        #endif
     }
     
     private static func _convertAuthStatus(_ clAuthStatus: CLAuthorizationStatus, requiresBackground: Bool) -> PermissionAuthorizationStatus {
