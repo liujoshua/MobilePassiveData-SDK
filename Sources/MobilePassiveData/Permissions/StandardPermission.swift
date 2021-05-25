@@ -192,7 +192,7 @@ public final class StandardPermission : Permission, Codable {
         case .photoLibrary:
             return Localization.localizedString("PHOTO_LIBRARY_PERMISSION_DENIED")
         case .notifications:
-            return ""  // There is no perceivable reason for an assessment to require notifications. syoung 05/25/2021
+            return Localization.localizedString("NOTIFICATIONS_PERMISSION_DENIED")
         }
     }
     private let _deniedMessage: String?
