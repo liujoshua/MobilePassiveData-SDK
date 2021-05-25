@@ -73,6 +73,9 @@ public enum StandardPermissionType: String, PermissionType, Codable, CaseIterabl
     /// - seealso: `NSPhotoLibraryUsageDescription`
     case photoLibrary
     
+    /// Used to request permission to post local notifications.
+    case notifications
+    
     /// An identifier for the permission.
     public var identifier: String {
         return rawValue
@@ -95,6 +98,7 @@ public final class StandardPermission : Permission, Codable {
     public static let photoLibrary = StandardPermission(permissionType: .photoLibrary)
     public static let location = StandardPermission(permissionType: .location)
     public static let locationWhenInUse = StandardPermission(permissionType: .locationWhenInUse)
+    public static let notifications = StandardPermission(permissionType: .notifications)
     
     /// Default initializer.
     public init(permissionType : StandardPermissionType, title: String? = nil, reason: String? = nil, deniedMessage: String? = nil, restrictedMessage: String? = nil, requestIfNeeded: Bool? = nil, isOptional: Bool? = nil) {
@@ -187,6 +191,8 @@ public final class StandardPermission : Permission, Codable {
             return Localization.localizedString("MOTION_PERMISSION_DENIED")
         case .photoLibrary:
             return Localization.localizedString("PHOTO_LIBRARY_PERMISSION_DENIED")
+        case .notifications:
+            return Localization.localizedString("NOTIFICATIONS_PERMISSION_DENIED")
         }
     }
     private let _deniedMessage: String?

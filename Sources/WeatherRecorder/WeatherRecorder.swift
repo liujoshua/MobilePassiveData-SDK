@@ -37,7 +37,7 @@ import JsonModel
 
 public typealias WeatherServiceCompletionHandler = (WeatherService, [ResultData]?, Error?) -> Void
 
-public protocol WeatherService : class {
+public protocol WeatherService : AnyObject {
     var configuration: WeatherServiceConfiguration { get }
     func fetchResult(for coordinates: CLLocation, _ completion: @escaping WeatherServiceCompletionHandler)
 }

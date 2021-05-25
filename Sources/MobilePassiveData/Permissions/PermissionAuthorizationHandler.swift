@@ -34,7 +34,7 @@ import Foundation
 
 
 /// An authorization adapter is a class that can manage requesting authorization for a given permission.
-public protocol PermissionAuthorizationAdaptor : class {
+public protocol PermissionAuthorizationAdaptor : AnyObject {
     
     /// A list of the permissions that this adaptor can manage.
     var permissions: [PermissionType] { get }

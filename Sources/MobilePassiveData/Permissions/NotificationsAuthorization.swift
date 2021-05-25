@@ -1,7 +1,8 @@
 //
-//  PermissionType.swift
+//  NotificationsAuthorization.swift
+//  
 //
-//  Copyright © 2017-2021 Sage Bionetworks. All rights reserved.
+//  Copyright © 2021 Sage Bionetworks. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,29 +32,25 @@
 //
 
 import Foundation
+import UserNotifications
 
-/// `PermissionType` is a generic configuration object with information about a given permission.
-/// The permission type can be used by the app to handle gracefully requesting authorization from
-/// the user for access to sensors and hardware required by the app.
-public protocol PermissionType {
+/// An authorization adapator for use when requesting permission to send local notifications. Typically, this will
+/// be used during onboarding to request sending the participant notifications.
+public final class NotificationsAuthorization : PermissionAuthorizationAdaptor {
     
-    /// An identifier for the permission.
-    var identifier: String { get }
+    public static let shared = NotificationsAuthorization()
+        
+    public let permissions: [PermissionType] = [StandardPermissionType.notifications]
+    
+    public func authorizationStatus(for permission: String) -> PermissionAuthorizationStatus {
+        .notDetermined
+    }
+    
+    public func requestAuthorization(for permission: Permission, _ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (status, error) in
+            DispatchQueue.main.async {
+                completion(status ? .authorized : .denied, error)
+            }
+        }
+    }
 }
-
-/// An `Permission` can carry additional information about the permission
-@objc public protocol Permission : AnyObject {
-    
-    /// An identifier for the permission.
-    var identifier: String { get }
-    
-    /// A title for this permission.
-    var title: String? { get }
-    
-    /// Additional reason for requiring the permission.
-    var reason: String? { get }
-    
-    /// The failure message to show for this authorization status.
-    func message(for status: PermissionAuthorizationStatus) -> String?
-}
-
