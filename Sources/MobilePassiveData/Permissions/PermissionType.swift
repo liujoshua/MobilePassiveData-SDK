@@ -42,7 +42,7 @@ public protocol PermissionType {
 }
 
 /// An `Permission` can carry additional information about the permission
-@objc public protocol Permission : class {
+@objc public protocol Permission : AnyObject {
     
     /// An identifier for the permission.
     var identifier: String { get }

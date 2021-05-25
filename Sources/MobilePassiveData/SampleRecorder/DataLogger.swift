@@ -33,7 +33,7 @@
 import Foundation
 import ExceptionHandler
 
-public protocol LogFileHandle : class {
+public protocol LogFileHandle : AnyObject {
     
     /// A unique identifier for the logger.
     var identifier: String { get }

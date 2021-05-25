@@ -54,7 +54,7 @@ public protocol AsyncActionVendor : AsyncActionConfiguration {
 public typealias AsyncActionCompletionHandler = (AsyncActionController, ResultData?, Error?) -> Void
 
 /// `AsyncActionControllerDelegate` is the delegate protocol for `AsyncActionController`.
-public protocol AsyncActionControllerDelegate : class {
+public protocol AsyncActionControllerDelegate : AnyObject {
     
     /// Method called when the controller fails. The delegate is responsible
     /// for handling the UI/UX and graceful exit (if needed) for failures.
@@ -71,7 +71,7 @@ public protocol AsyncActionControllerDelegate : class {
 }
 
 /// A controller for an async action configuration.
-public protocol AsyncActionController : class {
+public protocol AsyncActionController : AnyObject {
     
     /// Object equality.
     func isEqual(_ object: Any?) -> Bool
