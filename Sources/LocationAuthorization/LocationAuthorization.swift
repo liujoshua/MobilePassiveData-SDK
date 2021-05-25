@@ -45,46 +45,31 @@ import MobilePassiveData
 /// `Info.plist` file. As of this writing (syoung 02/08/2018), those keys are:
 /// - `Privacy - Location Always and When In Use Usage Description`
 /// - `Privacy - Location When In Use Usage Description`
-public final class LocationAuthorization : PermissionAuthorizationAdaptor {
+public final class LocationAuthorization : NSObject, PermissionAuthorizationAdaptor, CLLocationManagerDelegate {
+    
+    enum LocationAuthorizationError : Error {
+        case timeout
+    }
     
     public static let shared = LocationAuthorization()
-    
-    /// This adaptor is intended for checking for location permissions.
-    private static let validPermissions: [PermissionType] = [
+        
+    public let permissions: [PermissionType] = [
         StandardPermissionType.location,
-        StandardPermissionType.locationWhenInUse]
-    public let permissions: [PermissionType] = LocationAuthorization.validPermissions
-    
-    private let locationManager: CLLocationManager = CLLocationManager()
+        StandardPermissionType.locationWhenInUse,
+    ]
 
     /// Returns the authorization status for the location manager.
     public func authorizationStatus(for permission: String) -> PermissionAuthorizationStatus {
-        guard let permissionType = StandardPermissionType(rawValue: permission)
-            else {
-                debugPrint("'\(permission)' is not a valid standard permission type.")
-                return .notDetermined
-        }
-        
-        if !self.permissions.contains(where: { $0.identifier == permissionType.identifier }) {
-            debugPrint("'\(permission)' is not a valid location permission type.")
-            return .notDetermined
-        }
-
-        return LocationAuthorization.authorizationStatus(for: permissionType)
+        _authStatus(for: permission).status
     }
     
-    /// Requests permission to access location.
-    public func requestAuthorization(for permission: Permission, _ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
-        guard let permissionType = StandardPermissionType(rawValue: permission.identifier)
+    private func _authStatus(for permission: String) -> (status: PermissionAuthorizationStatus, permissionType: StandardPermissionType?) {
+        guard let permissionType = StandardPermissionType(rawValue: permission),
+              self.permissions.contains(where: { $0.identifier == permissionType.identifier })
             else {
-                let errStr = "'\(permission.identifier)' is not a valid standard permission type."
-                let error = PermissionError.notHandled(errStr)
-                debugPrint(errStr)
-                completion(.denied, error)
-                return
+                return (.notDetermined, nil)
         }
-        
-        LocationAuthorization.requestAuthorization(for: permissionType, locationManager: self.locationManager, completion)
+        return (Self.authorizationStatus(for: permissionType), permissionType)
     }
     
     /// Returns authorization status for `.location` and `.locationWhenInUse` permissions.
@@ -100,7 +85,38 @@ public final class LocationAuthorization : PermissionAuthorizationAdaptor {
     }
     
     private static func _locationAuthorizationStatus(_ requiresBackground: Bool) -> PermissionAuthorizationStatus {
-        switch CLLocationManager.authorizationStatus() {
+        _convertAuthStatus(CLLocationManager.authorizationStatus(), requiresBackground: requiresBackground)
+    }
+    
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        return manager
+    }()
+    
+    private var _completion: ((PermissionAuthorizationStatus, Error?) -> Void)?
+    private var _requestingType: StandardPermissionType?
+    
+    /// Requests permission to access the device location.
+    public func requestAuthorization(for permission: Permission, _ completion: @escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
+        let (status, pType) = self._authStatus(for: permission.identifier)
+        guard status == .notDetermined, let permissionType = pType else {
+            completion(status, nil)
+            return
+        }
+        
+        _completion = completion
+        _requestingType = permissionType
+        switch permissionType {
+        case .location:
+            locationManager.requestAlwaysAuthorization()
+        default:
+            locationManager.requestWhenInUseAuthorization()
+        }
+    }
+    
+    private static func _convertAuthStatus(_ clAuthStatus: CLAuthorizationStatus, requiresBackground: Bool) -> PermissionAuthorizationStatus {
+        switch clAuthStatus {
         case .notDetermined:
             return .notDetermined
         case .restricted:
@@ -114,27 +130,16 @@ public final class LocationAuthorization : PermissionAuthorizationAdaptor {
         }
     }
     
-    public static func requestAuthorization(for permissionType: StandardPermissionType, locationManager: CLLocationManager, _ completion:@escaping ((PermissionAuthorizationStatus, Error?) -> Void)) {
-        if !self.validPermissions.contains(where: { $0.identifier == permissionType.identifier }) {
-            let errStr = "'\(permissionType.identifier)' is not a valid location permission type."
-            let error = PermissionError.notHandled(errStr)
-            debugPrint(errStr)
-            completion(.denied, error)
-            return
-        }
-        #if os(macOS)
-        locationManager.requestAlwaysAuthorization()
-        #elseif os(tvOS)
-        locationManager.requestWhenInUseAuthorization()
-        #else
-        switch permissionType {
-        case StandardPermissionType.location:
-            locationManager.requestAlwaysAuthorization()
-        default:
-            locationManager.requestWhenInUseAuthorization()
-        }
-        #endif
-        
-        completion(self.authorizationStatus(for: permissionType), nil)
+    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        guard status != .notDetermined else { return }
+        let rsdStatus = Self._convertAuthStatus(status, requiresBackground: _requestingType == .location )
+        _completion?(rsdStatus, nil)
+        _completion = nil
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        _completion?(.denied, error)
+        _completion = nil
     }
 }
+
