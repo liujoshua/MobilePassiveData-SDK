@@ -8,7 +8,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [
         // Add support for all platforms starting from a specific version.
-        .macOS(.v11),
+        .macOS(.v10_15),
         .iOS(.v11),
         .watchOS(.v7),
         .tvOS(.v12)
