@@ -54,8 +54,8 @@ public struct AudioSessionSettings : Codable, Hashable {
     }
     
     mutating func merge(_ otherSettings: AudioSessionSettings) {
-        if self.category < otherSettings.category {
-            if otherSettings.category == .record && self.category.isPlayback {
+        if self.category < otherSettings.category && !self.category.isPlayback {
+            if otherSettings.category == .record {
                 self.category = .playAndRecord
             } else {
                 self.category = otherSettings.category
@@ -107,6 +107,10 @@ public struct AudioSessionSettings : Codable, Hashable {
         /// which use audio that should not be mixed with other audio apps running in the
         /// background.
         case soloAmbient
+        /// An audio session is used to keep the app active in the background with the screen locked.
+        /// This is intended to be used with a silent or ambient sound file that is nonprimary, but will
+        /// still play with the app in the background.
+        case backgroundPlayback
         /// The category for playing intermittent sounds, either using pre-recorded sound files or
         /// using speech-to-text, that are central to the successful use of your app. As such, the
         /// app will play sound *even if* the user has the silence lock on.
@@ -121,8 +125,14 @@ public struct AudioSessionSettings : Codable, Hashable {
         /// over Internet Protocol (VoIP) app.
         case playAndRecord
         
-        var isPlayback: Bool {
+        /// Is this app playing sound that is central to successfully running the task such as voice prompts?
+        public var isPlayback: Bool {
             self == .intermittentPlayback || self == .continuousPlayback
+        }
+        
+        /// Is the app recording audio?
+        public var isRecording: Bool {
+            self == .record || self == .playAndRecord
         }
         
         public static func < (lhs: AudioSessionSettings.Category, rhs: AudioSessionSettings.Category) -> Bool {

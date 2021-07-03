@@ -38,6 +38,9 @@ import UserNotifications
 /// be used during onboarding to request sending the participant notifications.
 public final class NotificationsAuthorization : PermissionAuthorizationAdaptor {
     
+    public init() {
+    }
+    
     public static let shared = NotificationsAuthorization()
         
     public let permissions: [PermissionType] = [StandardPermissionType.notifications]

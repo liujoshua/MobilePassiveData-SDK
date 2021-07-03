@@ -51,6 +51,10 @@ import AVFoundation
 /// - seealso: `AudioRecorderConfiguration`.
 public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate {
     
+    enum AudioRecorderError : Error {
+        case audioSessionPlaying
+    }
+    
     let audioSessionIdentifier = "org.sagebase.AudioRecorder.\(UUID())"
 
     deinit {
@@ -81,6 +85,16 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate {
     
     /// Override to implement requesting permission to access the participant's microphone.
     override public func requestPermissions(on viewController: Any, _ completion: @escaping AsyncActionCompletionHandler) {
+        
+        // Check that the recorder is not being attached to an audio session where the
+        // session is using audio in a manner that requires playback through the louder
+        // speakers that are at the bottom of the phone.
+        if let settings = AudioSessionController.shared.currentSettings, settings.category.isPlayback {
+            self.updateStatus(to: .failed , error: AudioRecorderError.audioSessionPlaying)
+            completion(self, nil, AudioRecorderError.audioSessionPlaying)
+            return
+        }
+        
         self.updateStatus(to: .requestingPermission , error: nil)
         AudioSessionController.shared.startAudioSessionIfNeeded(on: audioSessionIdentifier, with: .recordDBLevel)
         if AudioRecorderAuthorization.authorizationStatus() == .authorized {
