@@ -131,9 +131,9 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     func authorizationGranted(for authStatus: CLAuthorizationStatus) -> Bool {
         #if os(macOS)
-        authStatus == .authorizedAlways
+        return authStatus == .authorizedAlways
         #else
-        authStatus == .authorizedAlways || authStatus == .authorizedWhenInUse
+        return authStatus == .authorizedAlways || authStatus == .authorizedWhenInUse
         #endif
     }
     
