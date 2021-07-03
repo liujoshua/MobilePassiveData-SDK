@@ -60,7 +60,7 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     public weak var delegate: AsyncActionControllerDelegate?
     
     /// The location manager is used to ping the participant's current location.
-    public private(set) var locationManager: CLLocationManager?
+    public private(set) var locationManager: CLLocationManager!
     
     /// The weather result associated with this recorder.
     public private(set) var weatherResult: WeatherResult
@@ -70,34 +70,9 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
 
     /// Override to request GPS and motion permissions.
     public func requestPermissions(on viewController: Any, _ completion: @escaping AsyncActionCompletionHandler) {
-        
-        // Get the current status and exit early if the status is restricted or denied.
-        let status = LocationAuthorization.shared.authorizationStatus(for: StandardPermissionType.locationWhenInUse.identifier)
-        if status == .denied || status == .restricted {
-            _serviceFailed(status: status)
-            completion(self, nil, self.error)
-            return
-        }
-        
-        // If the status is not determined, then need to request it.
-        self._setupLocationManager()
-        if status == .notDetermined {
-            self.status = .requestingPermission
-            self._permissionCompletion = completion
-            #if os(macOS)
-            self.locationManager!.requestAlwaysAuthorization()
-            #else
-            self.locationManager!.requestWhenInUseAuthorization()
-            #endif
-        }
-        else {
-            self.status = .permissionGranted
-            completion(self, nil, nil)
-        }
+        self.status = .permissionGranted
+        completion(self, nil, nil)
     }
-        
-    private var _permissionCompletion: AsyncActionCompletionHandler?
-    private var _startCompletion: AsyncActionCompletionHandler?
     
     private func _setupLocationManager() {
         guard self.locationManager == nil else { return }
@@ -120,38 +95,52 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     public func start(_ completion: AsyncActionCompletionHandler?) {
         guard self.status < .starting else { return }
-        if self.status <= .requestingPermission {
-            self.status = .starting
-            self._startCompletion = completion
+        
+        // Set the status to running and then call completion.
+        self.status = .starting
+        
+        // Set up location manager and get authorization status
+        _setupLocationManager()
+        let authStatus: CLAuthorizationStatus = {
+            if #available(iOS 14.0, macOS 11.0, *) {
+                return self.locationManager.authorizationStatus
+            } else {
+                return CLLocationManager.authorizationStatus()
+            }
+        }()
+        
+        // If previously denied then do not continue
+        if authStatus == .denied || authStatus == .restricted {
+            let failureStatus: PermissionAuthorizationStatus = (authStatus == .restricted) ? .restricted : .denied
+            _serviceFailed(status: failureStatus)
+            completion?(self, nil, self.error)
             return
+        }
+        
+        if authStatus == .notDetermined {
+            self.status = .starting
+            self.locationManager.requestWhenInUseAuthorization()
         }
         else {
-            _requestLocation(completion)
+            self.status = .running
+            self.locationManager.requestLocation()
         }
+        
+        completion?(self, nil, self.error)
     }
     
-    private func _requestLocation(_ completion: AsyncActionCompletionHandler?) {
-        guard self.status < .running else { return }
-        let status = LocationAuthorization.authorization(for: self.locationManager ?? CLLocationManager(), requiresBackground: false)
-        guard status == .authorized else {
-            _serviceFailed(status: .denied)
-            DispatchQueue.main.async {
-                completion?(self, nil, self.error)
-            }
-            return
-        }
-        DispatchQueue.main.async {
-            guard self.status < .running else { return }
-            self._setupLocationManager()
-            self.status = .running
-            self.locationManager?.requestLocation()
-            completion?(self, nil, nil)
-        }
+    func authorizationGranted(for authStatus: CLAuthorizationStatus) -> Bool {
+        #if os(macOS)
+        authStatus == .authorizedAlways
+        #else
+        authStatus == .authorizedAlways || authStatus == .authorizedWhenInUse
+        #endif
     }
     
     private func _stopLocationUpdates() {
         guard let manager = self.locationManager else { return }
         manager.stopUpdatingLocation()
+        manager.delegate = nil
         self.locationManager = nil
     }
 
@@ -198,21 +187,21 @@ open class WeatherRecorder : NSObject, AsyncActionController, CLLocationManagerD
     
     public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         guard self.status <= .running else { return }
-        let status = LocationAuthorization.authorization(for: manager, requiresBackground: false)
-        guard status != .notDetermined else { return }
-        if status == .denied || status == .restricted {
-            let status: PermissionAuthorizationStatus = (status == .restricted) ? .restricted : .denied
-            _serviceFailed(status: status)
+        let authStatus: CLAuthorizationStatus = {
+            if #available(iOS 14.0, macOS 11.0, *) {
+                return manager.authorizationStatus
+            } else {
+                return CLLocationManager.authorizationStatus()
+            }
+        }()
+        guard authStatus != .notDetermined else { return }
+        if authStatus == .denied || authStatus == .restricted {
+            let status: PermissionAuthorizationStatus = (authStatus == .restricted) ? .restricted : .denied
+            self._serviceFailed(status: status)
         }
-        else if self.status <= .requestingPermission {
-            self.status = .permissionGranted
-        }
-        self._permissionCompletion?(self, nil, self.error)
-        self._permissionCompletion = nil
-        
-        if self.status == .starting {
-            self._requestLocation(_startCompletion)
-            self._startCompletion = nil
+        else if self.status == .starting, self.authorizationGranted(for: authStatus) {
+            self.status = .running
+            manager.requestLocation()
         }
     }
     
