@@ -11,7 +11,7 @@ let package = Package(
         .macOS(.v10_15),
         .iOS(.v11),
         .watchOS(.v7),
-        .tvOS(.v12)
+        .tvOS(.v14)
     ],
     products: [
         // MARK: Main Library

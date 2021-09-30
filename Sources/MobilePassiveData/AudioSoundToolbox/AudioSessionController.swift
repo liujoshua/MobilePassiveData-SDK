@@ -199,7 +199,7 @@ public final class AudioSessionController {
     private func _startBackgroundSilenceIfNeeded() {
         guard silencePlayer == nil,
               let settings = currentSettings,
-              settings.category < .record,
+              !settings.category.isRecording,
               let player = SilencePlayer()
         else {
             return
@@ -211,9 +211,9 @@ public final class AudioSessionController {
 
 extension AudioSessionSettings {
     static let backgroundSilence: AudioSessionSettings =
-        AudioSessionSettings(category: .continuousPlayback,
+        AudioSessionSettings(category: .backgroundPlayback,
                              mode: .spokenAudio,
-                             mixingOptions: .interruptSpokenAudioAndMixWithOthers)
+                             mixingOptions: .mixWithOthers)
 }
 
 /// An audio player that plays the background sound used to keep the motion sensors active. This is
@@ -261,7 +261,7 @@ extension AudioSessionSettings.Category {
             return .soloAmbient
         case .playAndRecord:
             return .playAndRecord
-        case .intermittentPlayback, .continuousPlayback:
+        case .intermittentPlayback, .continuousPlayback, .backgroundPlayback:
             return .playback
         case .record:
             return .record
@@ -318,6 +318,9 @@ extension AudioSessionSettings.MixingOptions {
 /// Applications that do not support audio sessions are currently not supported.
 public final class AudioSessionController {
     public static let shared: AudioSessionController = AudioSessionController()
+    
+    /// The current audio session settings.
+    public private(set) var currentSettings: AudioSessionSettings?
     
     public func startBackgroundAudioIfNeeded(on activityIdentifier: String) {
         // TODO: syoung 12/18/2020 Implement support when/if needed for these platforms.
