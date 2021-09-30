@@ -32,6 +32,12 @@ kotlin {
                     .getProperty("openWeatherApiKey")
                     ?: System.getenv("OPEN_WEATHER_API_KEY")
             )
+            systemProperty(
+                "airNowApiKey",
+                gradleLocalProperties(rootProject.rootDir)
+                    .getProperty("airNowApiKey")
+                    ?: System.getenv("AIR_NOW_API_KEY")
+            )
         }
     }
 

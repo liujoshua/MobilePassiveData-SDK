@@ -35,6 +35,5 @@ enum class WeatherServiceProviderName(val serializedName: String) : StringEnum {
                 it.serializedName == serializedName
             }
         }
-
     }
 }
