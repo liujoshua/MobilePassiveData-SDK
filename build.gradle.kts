@@ -16,7 +16,7 @@ plugins {
 }
 
 allprojects {
-    group = "org.sagebionetworks.bridge.kmm"
+    group = "org.sagebionetworks.research.kmm"
     version = "0.1.0-SNAPSHOT"
     repositories {
         google()

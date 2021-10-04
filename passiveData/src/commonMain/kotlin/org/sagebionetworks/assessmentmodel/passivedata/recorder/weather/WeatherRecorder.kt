@@ -2,51 +2,76 @@ package org.sagebionetworks.assessmentmodel.passivedata.recorder.weather
 
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.supervisorScope
-import org.sagebionetworks.assessmentmodel.passivedata.asyncaction.AsyncActionStatus
+import kotlinx.serialization.json.Json
 import org.sagebionetworks.assessmentmodel.passivedata.recorder.Recorder
 
 abstract class WeatherRecorder(override val configuration: WeatherConfiguration) :
     Recorder<WeatherResult> {
 
+    // TODO joliu inject
     val httpClient = HttpClient {
-
+        install(JsonFeature) {
+            serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
+                ignoreUnknownKeys = true
+            })
+        }
     }
     lateinit var weatherServices: List<WeatherService>
-
-
-    override val status: AsyncActionStatus
-        get() = TODO("Not yet implemented")
-    override val currentStepPath: String
-        get() = TODO("Not yet implemented")
+    override val result = CompletableDeferred<WeatherResult>()
 
     suspend fun launchWeatherServices(location: Location?) {
+        Napier.d("Launching weather services")
+        Napier.d("Location: $location")
         if (location == null) {
             Napier.w("No location available, unable to start recorder")
             return
         }
+        // TODO joliu remove
         weatherServices = configuration.services.map { weatherServiceFactory(it) }
         supervisorScope {
-            weatherServices.map { service ->
-                this.async {
-                    return@async service.getResult(location)
+            val res = weatherServices.map { service ->
+                try {
+                    service.getResult(location)
+                } catch (e: Exception) {
+                    Napier.w(
+                        "Encountered exception in ${service.configuration.identifier} service",
+                        e
+                    )
+                    return@map null
                 }
-            }
+            }.filterNotNull()
+
+            val airQualityServiceResult = res.find {
+                it is AirQualityServiceResult
+            } as AirQualityServiceResult?
+
+            val weatherServiceResult = res.find { it is WeatherServiceResult }
+                    as WeatherServiceResult?
+
+            val weatherResult = WeatherResult(
+                configuration.identifier,
+                weather = weatherServiceResult,
+                airQuality = airQualityServiceResult
+            )
+
+            result.complete(value = weatherResult)
         }
     }
 
     fun weatherServiceFactory(configuration: WeatherServiceConfiguration): WeatherService {
         return when (configuration.providerName) {
             WeatherServiceProviderName.AIR_NOW -> {
-                OpenWeatherService(
+                AirQualityService(
                     configuration,
                     httpClient
                 )
             }
-            else -> {
-                // TODO: AQI
+            WeatherServiceProviderName.OPEN_WEATHER -> {
                 OpenWeatherService(
                     configuration,
                     httpClient
@@ -58,22 +83,15 @@ abstract class WeatherRecorder(override val configuration: WeatherConfiguration)
     abstract suspend fun getLocation(): Location?
 
     override fun pause() {
-        TODO("Not yet implemented")
+        // ignored
     }
 
     override fun resume() {
-        TODO("Not yet implemented")
+        // ignored
     }
 
     override fun isPaused(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
-    override fun stop() {
-    }
-
-    override val result = CompletableDeferred<WeatherResult>()
-
-    override fun cancel() {
-    }
 }

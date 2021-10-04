@@ -100,7 +100,7 @@ kotlin {
                 implementation(Deps.Koin.android)
 
                 // TODO: experimental
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:${Versions.kotlinCoroutines}")
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:${Versions.kotlinCoroutines}")
             }
         }
         val androidTest by getting {

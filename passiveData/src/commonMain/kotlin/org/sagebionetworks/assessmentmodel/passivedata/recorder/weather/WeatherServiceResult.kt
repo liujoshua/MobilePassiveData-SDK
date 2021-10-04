@@ -18,6 +18,7 @@ data class WeatherServiceResult(
     val snow: Precipitation? = null,
     val wind: Wind? = null
 ) : ResultData {
+    val serviceType = WeatherServiceType.Weather
 
     override val endDate: Instant
         get() = startDate

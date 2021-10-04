@@ -25,7 +25,7 @@ interface AsyncActionConfiguration {
     /// be started when the task is started.
     val startStepIdentifier: String?
 
-
-    /// Validate the async action to check for any configuration that should throw an error.
-    // TODO: fun validate()
+    //  TODO: Validate the async action to check for any configuration that should throw an error.
+    //      - liujoshua 2021-10-01
+    //  fun validate()
 }
