@@ -5,9 +5,10 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.sagebionetworks.assessmentmodel.passivedata.ResultData
+import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceTypeStrings.TYPE_WEATHER
 
 @Serializable
-@SerialName("weather")
+@SerialName(TYPE_WEATHER)
 data class WeatherResult(
     override val identifier: String,
     override val startDate: Instant = Clock.System.now(),
@@ -16,3 +17,4 @@ data class WeatherResult(
     val airQuality: AirQualityServiceResult?
 ) : ResultData {
 }
+

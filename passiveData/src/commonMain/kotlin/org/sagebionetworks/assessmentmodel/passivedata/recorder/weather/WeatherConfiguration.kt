@@ -4,6 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.sagebionetworks.assessmentmodel.passivedata.asyncaction.AsyncActionConfiguration
 import org.sagebionetworks.assessmentmodel.passivedata.internal.StringEnum
+import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceProviders.TYPE_AIR_NOW
+import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceProviders.TYPE_OPEN_WEATHER
 
 @Serializable
 data class WeatherConfiguration(
@@ -22,18 +24,23 @@ data class WeatherServiceConfiguration(
 )
 
 @Serializable
-enum class WeatherServiceProviderName(val serializedName: String) : StringEnum {
-    @SerialName("airNow")
-    AIR_NOW("airNow"),
+enum class WeatherServiceProviderName(override val serialName: String) : StringEnum {
+    @SerialName(TYPE_AIR_NOW)
+    AIR_NOW(TYPE_AIR_NOW),
 
-    @SerialName("openWeather")
-    OPEN_WEATHER("openWeather");
+    @SerialName(TYPE_OPEN_WEATHER)
+    OPEN_WEATHER(TYPE_OPEN_WEATHER);
 
     companion object {
         fun findForSerializedName(serializedName: String): WeatherServiceProviderName? {
             return WeatherServiceProviderName.values().find {
-                it.serializedName == serializedName
+                it.serialName == serializedName
             }
         }
     }
+}
+
+object WeatherServiceProviders {
+    const val TYPE_AIR_NOW = "airNow"
+    const val TYPE_OPEN_WEATHER = "openWeather"
 }

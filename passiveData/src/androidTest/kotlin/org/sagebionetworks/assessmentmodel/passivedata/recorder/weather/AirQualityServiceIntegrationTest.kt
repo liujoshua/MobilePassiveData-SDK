@@ -4,7 +4,6 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -28,25 +27,24 @@ class AirQualityServiceIntegrationTest {
             airQualityServiceApiKey!!
         )
 
-        val service = OpenWeatherService(
+        val service = AirQualityService(
             serviceConfiguration,
             httpClient
         )
 
-        val weatherServiceResult = runBlocking {
+        val airQualityServiceResult = runBlocking {
             service.getResult(
                 Location(
-                    166.0,
-                    42.0
+                    -122.22,
+                    37.48
                 )
             )
-        } as WeatherServiceResult
+        } as AirQualityServiceResult
 
         val json = kotlinx.serialization.json.Json {
             prettyPrint = true
         }
-        println(json.encodeToString(weatherServiceResult))
-        assertNotNull(weatherServiceResult)
-        assertEquals(WeatherServiceProviderName.OPEN_WEATHER, weatherServiceResult.providerName)
+        assertNotNull(airQualityServiceResult)
+        assertEquals(WeatherServiceProviderName.AIR_NOW, airQualityServiceResult.providerName)
     }
 }

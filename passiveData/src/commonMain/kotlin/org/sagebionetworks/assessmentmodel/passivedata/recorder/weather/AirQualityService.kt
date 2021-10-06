@@ -5,14 +5,19 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.datetime.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.sagebionetworks.assessmentmodel.passivedata.ResultData
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 class AirQualityService(
     override val configuration: WeatherServiceConfiguration,
     val httpClient: HttpClient
 ) : WeatherService {
+
+    @ExperimentalSerializationApi
     override suspend fun getResult(location: Location): ResultData {
 
         val startTime = Clock.System.now()
@@ -29,14 +34,34 @@ class AirQualityService(
             header("Accept", "application/json")
         }
 
-        return httpClient.get<List<Response>>(builder).firstOrNull {
-            it.dateForecast.trim() == dateString
-        }?.toAirQualityServiceResult(configuration.identifier, startTime) ?: let {
-            Napier.w(
-                "Failed to find valid response from " +
-                        "${configuration.providerName}: dateString=$dateString \n $it"
-            )
-            throw IllegalStateException("No valid dateForecast was returned.")
+        return (::handleResponse)(
+            httpClient.get(builder),
+            configuration,
+            dateString,
+            startTime
+        )
+    }
+
+    companion object {
+
+        @ExperimentalSerializationApi
+        internal fun handleResponse(
+            response: List<Response>,
+            configuration: WeatherServiceConfiguration,
+            dateString: String,
+            startTime: Instant
+        ): AirQualityServiceResult {
+
+            return response.firstOrNull {
+//                throw IllegalStateException(it.toString() + dateString)
+                it.dateForecast.trim() == dateString
+            }?.toAirQualityServiceResult(configuration.identifier, startTime) ?: let {
+                Napier.w(
+                    "Failed to find valid response from " +
+                            "${configuration.providerName}: dateString=$dateString"
+                )
+                throw IllegalStateException("No valid dateForecast was returned.")
+            }
         }
     }
 

@@ -1,12 +1,13 @@
 package org.sagebionetworks.assessmentmodel.passivedata.recorder.weather
 
 import kotlinx.datetime.Instant
-import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.sagebionetworks.assessmentmodel.passivedata.ResultData
+import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceTypeStrings.TYPE_AIR_QUALITY
 
 @Serializable
+@SerialName(TYPE_AIR_QUALITY)
 data class AirQualityServiceResult(
     override val identifier: String,
     @SerialName("provider")
@@ -15,10 +16,6 @@ data class AirQualityServiceResult(
     val aqi: Int?,
     val category: Category?
 ) : ResultData {
-    @EncodeDefault(EncodeDefault.Mode.ALWAYS)
-    @SerialName("type")
-    val serviceType = WeatherServiceType.AirQuality
-
     override val endDate: Instant
         get() = startDate
 
