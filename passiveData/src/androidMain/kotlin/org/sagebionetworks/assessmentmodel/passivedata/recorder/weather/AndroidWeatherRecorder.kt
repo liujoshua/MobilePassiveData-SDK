@@ -28,8 +28,6 @@ class AndroidWeatherRecorder(
 
     override val status: AsyncActionStatus
         get() = _asyncStatus
-    override val currentStepPath: String
-        get() = TODO("Not yet implemented")
 
     @RequiresPermission(
         anyOf =

@@ -4,13 +4,14 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.sagebionetworks.assessmentmodel.passivedata.ResultData
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
 
 class AirQualityService(
     override val configuration: WeatherServiceConfiguration,
@@ -51,9 +52,7 @@ class AirQualityService(
             dateString: String,
             startTime: Instant
         ): AirQualityServiceResult {
-
             return response.firstOrNull {
-//                throw IllegalStateException(it.toString() + dateString)
                 it.dateForecast.trim() == dateString
             }?.toAirQualityServiceResult(configuration.identifier, startTime) ?: let {
                 Napier.w(

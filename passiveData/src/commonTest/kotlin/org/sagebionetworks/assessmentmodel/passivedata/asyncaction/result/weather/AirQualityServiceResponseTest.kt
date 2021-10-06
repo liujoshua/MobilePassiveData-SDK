@@ -1,17 +1,12 @@
 package org.sagebionetworks.assessmentmodel.passivedata.asyncaction.result.weather
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.AirQualityService
-import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.AirQualityServiceResult
 import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceConfiguration
 import org.sagebionetworks.assessmentmodel.passivedata.recorder.weather.WeatherServiceProviderName
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
