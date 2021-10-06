@@ -6,5 +6,5 @@ package org.sagebionetworks.assessmentmodel.passivedata.internal
 expect interface StringEnum {
     val name: String
 
-    abstract val serialName: String?
+    val serialName: String?
 }

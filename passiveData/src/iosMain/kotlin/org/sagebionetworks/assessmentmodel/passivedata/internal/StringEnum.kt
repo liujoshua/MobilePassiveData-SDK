@@ -6,6 +6,5 @@ package org.sagebionetworks.assessmentmodel.passivedata.internal
 actual interface StringEnum {
     actual val name: String
 
-    val serialName: String?
-        get() = null
+    actual val serialName: String?
 }
