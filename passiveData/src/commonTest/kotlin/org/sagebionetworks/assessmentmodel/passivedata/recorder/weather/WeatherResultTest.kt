@@ -1,12 +1,14 @@
 package org.sagebionetworks.assessmentmodel.passivedata.recorder.weather
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.plus
 import org.sagebionetworks.assessmentmodel.passivedata.ResultData
 import org.sagebionetworks.assessmentmodel.passivedata.resultDataSerializersModule
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class WeatherResultTest {
     @Serializable
@@ -21,6 +23,9 @@ class WeatherResultTest {
             serializersModule += resultDataSerializersModule
         }
         val json = jsonCoder.encodeToString(ResultDataWrapper(weatherResult))
-        println(json)
+
+        val deserialized = jsonCoder.decodeFromString<ResultDataWrapper>(json)
+
+        assertTrue(deserialized.resultData is WeatherResult)
     }
 }

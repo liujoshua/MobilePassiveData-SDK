@@ -44,4 +44,7 @@ jobs:
 
 
     - name: Build Assessment Model
+      env:
+        AIR_NOW_API_KEY: ${{ secrets.AIR_NOW_API_KEY }}
+        OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}
       run: ./gradlew build
