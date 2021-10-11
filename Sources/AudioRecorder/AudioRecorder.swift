@@ -158,8 +158,13 @@ public class AudioRecorder : SampleRecorder, AVAudioRecorderDelegate {
     }
     
     public override func cancel() {
-        DispatchQueue.main.sync {
+        if Thread.isMainThread {
             self.stopRecording(true)
+        }
+        else {
+            DispatchQueue.main.sync {
+                self.stopRecording(true)
+            }
         }
         super.cancel()
     }
