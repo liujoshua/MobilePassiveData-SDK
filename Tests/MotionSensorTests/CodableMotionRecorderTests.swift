@@ -35,6 +35,7 @@ import XCTest
 
 import JsonModel
 import MobilePassiveData
+import SharedResourcesTests
 
 class CodableMotionRecorderTests: XCTestCase {
     
@@ -58,94 +59,88 @@ class CodableMotionRecorderTests: XCTestCase {
         super.tearDown()
     }
     
-//    func testMotionRecorderConfiguration() {
-//        let json = """
-//        {
-//            "identifier": "foo",
-//            "type": "motion",
-//            "startStepIdentifier": "start",
-//            "stopStepIdentifier": "stop",
-//            "requiresBackgroundAudio": true,
-//            "recorderTypes": ["accelerometer", "gyro", "magnetometer"],
-//            "frequency": 50
-//        }
-//        """.data(using: .utf8)! // our data in native (JSON) format
-//        
-//        do {
-//            
-//            let object = try decoder.decode(MotionRecorderConfiguration.self, from: json)
-//            
-//            XCTAssertEqual(object.identifier, "foo")
-//            XCTAssertEqual(object.startStepIdentifier, "start")
-//            XCTAssertEqual(object.stopStepIdentifier, "stop")
-//            XCTAssertTrue(object.requiresBackgroundAudio)
-//            XCTAssertEqual(object.frequency, 50)
-//            if let recorderTypes = object.recorderTypes {
-//                XCTAssertEqual(recorderTypes, [.accelerometer, .gyro, .magnetometer])
-//            } else {
-//                XCTAssertNotNil(object.recorderTypes)
-//            }
-//            
-//            let jsonData = try encoder.encode(object)
-//            guard let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String : Any]
-//                else {
-//                    XCTFail("Encoded object is not a dictionary")
-//                    return
-//            }
-//            
-//            XCTAssertEqual(dictionary["identifier"] as? String, "foo")
-//            XCTAssertEqual(dictionary["startStepIdentifier"] as? String, "start")
-//            XCTAssertEqual(dictionary["stopStepIdentifier"] as? String, "stop")
-//            XCTAssertEqual(dictionary["requiresBackgroundAudio"] as? Bool, true)
-//            XCTAssertEqual(dictionary["frequency"] as? Double, 50)
-//            if let recorderTypes = dictionary["recorderTypes"] as? [String] {
-//                XCTAssertEqual(Set(recorderTypes), Set(["accelerometer", "gyro", "magnetometer"]))
-//            } else {
-//                XCTFail("Failed to encode the recorder types: \(String(describing: dictionary["recorderTypes"]))")
-//            }
-//            
-//        } catch let err {
-//            XCTFail("Failed to decode/encode object: \(err)")
-//            return
-//        }
-//    }
-//    
-//    func testMotionRecorderConfiguration_Defaults() {
-//        let json = """
-//        {
-//            "identifier": "foo",
-//            "type": "motion"
-//        }
-//        """.data(using: .utf8)! // our data in native (JSON) format
-//        
-//        do {
-//            let object = try decoder.decode(MotionRecorderConfiguration.self, from: json)
-//            
-//            XCTAssertEqual(object.identifier, "foo")
-//            XCTAssertNil(object.startStepIdentifier)
-//            XCTAssertNil(object.stopStepIdentifier)
-//            XCTAssertFalse(object.requiresBackgroundAudio)
-//            XCTAssertNil(object.frequency)
-//            XCTAssertNil(object.recorderTypes)
-//            
-//        } catch let err {
-//            XCTFail("Failed to decode/encode object: \(err)")
-//            return
-//        }
-//    }
-    
-    func testMotionRecord_Marker() {
-        let json = """
-        {
-            "uptime" : 37246.68689429167,
-            "timestamp" : 1.2498140833340585,
-            "stepPath" : "Cardio Stair Step/heartRate.after/heartRate",
-            "timestampDate" : "2018-01-30T15:13:20.597-02:30"
+    func testMotionRecorderConfiguration() {
+        let filename = "motion_config_custom"
+        guard let url = Bundle.testResources.url(forResource: filename, withExtension: "json")
+        else {
+            XCTFail("Could not find resource in the `Bundle.testResources`: \(filename).json")
+            return
         }
-        """.data(using: .utf8)! // our data in native (JSON) format
         
         do {
+            let json = try Data(contentsOf: url)
+            let object = try decoder.decode(MotionRecorderConfigurationObject.self, from: json)
             
+            XCTAssertEqual(object.identifier, "foo")
+            XCTAssertEqual(object.startStepIdentifier, "start")
+            XCTAssertEqual(object.stopStepIdentifier, "stop")
+            XCTAssertTrue(object.requiresBackgroundAudio)
+            XCTAssertEqual(object.frequency, 50)
+            if let recorderTypes = object.recorderTypes {
+                XCTAssertEqual(recorderTypes, [.accelerometer, .gyro, .magnetometer])
+            } else {
+                XCTAssertNotNil(object.recorderTypes)
+            }
+            
+            let jsonData = try encoder.encode(object)
+            guard let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String : Any]
+                else {
+                    XCTFail("Encoded object is not a dictionary")
+                    return
+            }
+            
+            XCTAssertEqual(dictionary["identifier"] as? String, "foo")
+            XCTAssertEqual(dictionary["startStepIdentifier"] as? String, "start")
+            XCTAssertEqual(dictionary["stopStepIdentifier"] as? String, "stop")
+            XCTAssertEqual(dictionary["requiresBackgroundAudio"] as? Bool, true)
+            XCTAssertEqual(dictionary["frequency"] as? Double, 50)
+            if let recorderTypes = dictionary["recorderTypes"] as? [String] {
+                XCTAssertEqual(Set(recorderTypes), Set(["accelerometer", "gyro", "magnetometer"]))
+            } else {
+                XCTFail("Failed to encode the recorder types: \(String(describing: dictionary["recorderTypes"]))")
+            }
+            
+        } catch let err {
+            XCTFail("Failed to decode/encode object: \(err)")
+            return
+        }
+    }
+    
+    func testMotionRecorderConfiguration_Defaults() {
+        let filename = "motion_config_default"
+        guard let url = Bundle.testResources.url(forResource: filename, withExtension: "json")
+        else {
+            XCTFail("Could not find resource in the `Bundle.testResources`: \(filename).json")
+            return
+        }
+        
+        do {
+            let json = try Data(contentsOf: url)
+            let object = try decoder.decode(MotionRecorderConfigurationObject.self, from: json)
+            
+            XCTAssertEqual(object.identifier, "foo")
+            XCTAssertNil(object.startStepIdentifier)
+            XCTAssertNil(object.stopStepIdentifier)
+            XCTAssertFalse(object.requiresBackgroundAudio)
+            XCTAssertNil(object.frequency)
+            XCTAssertNil(object.recorderTypes)
+            
+        } catch let err {
+            XCTFail("Failed to decode/encode object: \(err)")
+            return
+        }
+    }
+    
+    func testMotionRecord_Marker() {
+        let filename = "motion_record_marker"
+        guard let url = Bundle.testResources.url(forResource: filename, withExtension: "json")
+        else {
+            XCTFail("Could not find resource in the `Bundle.testResources`: \(filename).json")
+            return
+        }
+        
+        do {
+            let json = try Data(contentsOf: url)
             let object = try decoder.decode(MotionRecord.self, from: json)
             
             XCTAssertEqual(object.uptime, 37246.68689429167)
@@ -172,20 +167,15 @@ class CodableMotionRecorderTests: XCTestCase {
     }
     
     func testMotionRecord_Gyro() {
-        let json = """
-        {
-            "uptime" : 37246.68689429167,
-            "timestamp" : 1.2498140833340585,
-            "stepPath" : "Cardio Stair Step/heartRate.after/heartRate",
-            "sensorType" : "gyro",
-            "x" : 0.064788818359375,
-            "y" : -0.1324615478515625,
-            "z" : -0.9501953125,
+        let filename = "motion_record_gyro"
+        guard let url = Bundle.testResources.url(forResource: filename, withExtension: "json")
+        else {
+            XCTFail("Could not find resource in the `Bundle.testResources`: \(filename).json")
+            return
         }
-        """.data(using: .utf8)! // our data in native (JSON) format
         
         do {
-            
+            let json = try Data(contentsOf: url)
             let object = try decoder.decode(MotionRecord.self, from: json)
             
             XCTAssertEqual(object.uptime, 37246.68689429167)
@@ -220,24 +210,15 @@ class CodableMotionRecorderTests: XCTestCase {
     
     
     func testMotionRecord_Attitude() {
-        let json = """
-        {
-            "uptime" : 37246.68689429167,
-            "timestamp" : 1.2498140833340585,
-            "stepPath" : "Cardio Stair Step/heartRate.after/heartRate",
-            "sensorType" : "attitude",
-            "referenceCoordinate" : "North-West-Up",
-            "heading" : 270.25,
-            "eventAccuracy" : 4,
-            "x" : 0.064788818359375,
-            "y" : -0.1324615478515625,
-            "z" : -0.9501953125,
-            "w" : 1
+        let filename = "motion_record_attitude"
+        guard let url = Bundle.testResources.url(forResource: filename, withExtension: "json")
+        else {
+            XCTFail("Could not find resource in the `Bundle.testResources`: \(filename).json")
+            return
         }
-        """.data(using: .utf8)! // our data in native (JSON) format
         
         do {
-            
+            let json = try Data(contentsOf: url)
             let object = try decoder.decode(MotionRecord.self, from: json)
             
             XCTAssertEqual(object.uptime, 37246.68689429167)
