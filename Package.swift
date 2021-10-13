@@ -94,6 +94,12 @@ let package = Package(
                     "JsonModel",
                     "MobilePassiveData",
                 ]),
+        .testTarget(
+            name: "AudioRecorderTests",
+            dependencies: [
+                "AudioRecorder",
+                "SharedResourcesTests",
+            ]),
         
         // Supports the use of `CoreMotion` with a standardized permission and recording structure.
         // This library implements the recorder associated with the `MotionRecorderConfiguration`
@@ -110,6 +116,7 @@ let package = Package(
             name: "MotionSensorTests",
             dependencies: [
                 "MotionSensor",
+                "SharedResourcesTests",
             ]),
         
         // Location authorization adaptor for `CoreLocation`. This adaptor can be used for setting
